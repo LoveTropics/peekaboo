@@ -16,8 +16,6 @@ if (env.RELEASE) {
     version = "$mod_version+local"
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
-
 neoForge {
     version = project.neo_version
 
@@ -46,7 +44,21 @@ tasks.named('jar', Jar).configure {
     }
 }
 
-publishing.publications.register('mavenJava', MavenPublication) {
-    artifactId = 'peekaboo-api'
-    from components.java
+publishing {
+    publications.register('mavenJava', MavenPublication) {
+        artifactId = 'peekaboo-api'
+        from components.java
+    }
+
+    repositories {
+        if (env.MAVEN_URL) {
+            maven {
+                credentials {
+                    username env.MAVEN_USERNAME
+                    password env.MAVEN_PASSWORD
+                }
+                url env.MAVEN_URL
+            }
+        }
+    }
 }
