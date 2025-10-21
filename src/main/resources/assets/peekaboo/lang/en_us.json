@@ -1,0 +1,10 @@
+{
+  "commands.disguise.not_living_entity": "Sources is not a living entity",
+  "creative_tab.peekaboo": "Peekaboo",
+  "item.peekaboo.disguise": "Disguise",
+  "item.peekaboo.disguise.entity": "%s Disguise",
+  "item.peekaboo.mob_hat": "Mob Hat",
+  "item.peekaboo.mob_hat.entity": "%s Hat",
+  "item.peekaboo.plushie": "Plushie",
+  "item.peekaboo.plushie.entity": "%s Plushie"
+}

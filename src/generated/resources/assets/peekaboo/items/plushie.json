@@ -1,0 +1,11 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "peekaboo:item/plushie",
+    "model": {
+      "type": "peekaboo:mob_item",
+      "entity_source": "entity",
+      "inventory_sprite": "peekaboo:item/plushie"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "org.lovetropics.peekaboo.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "LivingEntityMixin", "PlayerMixin"
+  ],
+  "client": [
+    "client.AbstractClientPlayerMixin", "client.PoseStackAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
