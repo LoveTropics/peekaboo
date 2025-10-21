@@ -19,12 +19,14 @@ if (env.RELEASE) {
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 sourceSets {
+    api {
+    }
     main {
+        compileClasspath += sourceSets.api.output
+        runtimeClasspath += sourceSets.api.output
         resources {
             srcDir 'src/generated/resources'
         }
-    }
-    api {
     }
 }
 
@@ -69,13 +71,12 @@ def apiJar = tasks.register('apiJar', Jar) {
     manifest {
         attributes(
                 'FMLModType': 'GAMELIBRARY',
-                "Automatic-Module-Name": 'peekaboo-api'
+                "Automatic-Module-Name": 'peekaboo_api'
         )
     }
 }
 
 dependencies {
-    compileOnly sourceSets.api.output
     jarJar(files(apiJar))
 }
 
