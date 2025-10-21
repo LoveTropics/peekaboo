@@ -10,7 +10,7 @@ base {
 }
 
 def env = System.getenv()
-if (env.RELEASE) {
+if (env.RELEASE || env.GITHUB_RUN_NUMBER) {
     version = mod_version
 } else {
     version = "$mod_version+local"
