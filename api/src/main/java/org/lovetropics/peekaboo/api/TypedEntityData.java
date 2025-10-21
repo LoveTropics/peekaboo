@@ -1,4 +1,4 @@
-package org.lovetropics.peekaboo.diguise;
+package org.lovetropics.peekaboo.api;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;

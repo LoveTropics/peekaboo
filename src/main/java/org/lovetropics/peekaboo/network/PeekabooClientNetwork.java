@@ -9,7 +9,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.lovetropics.peekaboo.PeekabooMod;
-import org.lovetropics.peekaboo.diguise.EntityDisguiseHolder;
+import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
 
 @EventBusSubscriber(modid = PeekabooMod.ID, value = Dist.CLIENT)
 public class PeekabooClientNetwork {

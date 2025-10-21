@@ -11,8 +11,8 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.lovetropics.peekaboo.PeekabooDataComponents;
 import org.lovetropics.peekaboo.PeekabooMod;
-import org.lovetropics.peekaboo.diguise.Disguise;
-import org.lovetropics.peekaboo.diguise.TypedEntityData;
+import org.lovetropics.peekaboo.api.Disguise;
+import org.lovetropics.peekaboo.api.TypedEntityData;
 
 import java.util.function.Function;
 

@@ -4,7 +4,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.lovetropics.peekaboo.PeekabooDataComponents;
-import org.lovetropics.peekaboo.diguise.TypedEntityData;
+import org.lovetropics.peekaboo.api.TypedEntityData;
 
 public class SimpleMobItem extends Item {
     public SimpleMobItem(Properties properties) {
