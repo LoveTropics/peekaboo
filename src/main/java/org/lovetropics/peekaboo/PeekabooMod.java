@@ -69,7 +69,10 @@ public class PeekabooMod {
             @Override
             @Nullable
             public EntityDisguiseHolder getDisguiseHolder(Entity entity) {
-                return entity.getExistingDataOrNull(ATTACHMENT);
+                if (entity instanceof LivingEntity) {
+                    return entity.getData(ATTACHMENT);
+                }
+                return null;
             }
 
             @Override
