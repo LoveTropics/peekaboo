@@ -25,3 +25,10 @@ mandatory=true
 versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="${mod_id}_api"
+mandatory=true
+versionRange="[${mod_version},)"
+ordering="NONE"
+side="BOTH"
