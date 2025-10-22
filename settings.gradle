@@ -10,3 +10,5 @@ plugins {
 }
 
 rootProject.name = 'peekaboo'
+
+include('peakaboo-api')

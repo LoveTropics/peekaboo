@@ -1,0 +1,57 @@
+plugins {
+    id 'idea'
+    id 'maven-publish'
+    id 'java-library'
+    id 'net.neoforged.moddev'
+}
+
+group = rootProject.group
+version = rootProject.version
+
+neoForge {
+    version = project.neo_version
+
+    parchment {
+        minecraftVersion = project.minecraft_version
+        mappingsVersion = project.parchment_version
+    }
+
+    mods {
+        "${mod_id}_api" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    def replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : "${mod_id}_api",
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from 'src/main/templates'
+    into 'build/generated/sources/modMetadata'
+}
+sourceSets.main.resources.srcDir generateModMetadata
+
+neoForge.ideSyncTask generateModMetadata
+
+publishing {
+    publications.register('mavenJavaApi', MavenPublication) {
+        from components.java
+    }
+}
+
+tasks.withType(PublishToMavenRepository).configureEach { t ->
+    t.mustRunAfter(provider { rootProject.tasks.withType(PublishToMavenRepository) })
+}
