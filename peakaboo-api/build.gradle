@@ -1,8 +1,5 @@
 plugins {
-    id 'idea'
-    id 'maven-publish'
-    id 'java-library'
-    id 'net.neoforged.moddev'
+    id 'org.lovetropics.peakaboo.conventions'
 }
 
 group = rootProject.group
@@ -23,8 +20,13 @@ neoForge {
     }
 }
 
-def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
-    def replaceProperties = [
+java {
+    withJavadocJar()
+}
+
+conventions {
+    javaVersion = 21
+    createModMetadataTask([
             minecraft_version      : minecraft_version,
             minecraft_version_range: minecraft_version_range,
             neo_version            : neo_version,
@@ -36,22 +38,11 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
             mod_version            : mod_version,
             mod_authors            : mod_authors,
             mod_description        : mod_description
-    ]
-    inputs.properties replaceProperties
-    expand replaceProperties
-    from 'src/main/templates'
-    into 'build/generated/sources/modMetadata'
+    ])
 }
-sourceSets.main.resources.srcDir generateModMetadata
-
-neoForge.ideSyncTask generateModMetadata
 
 publishing {
     publications.register('mavenJavaApi', MavenPublication) {
         from components.java
     }
-}
-
-tasks.withType(PublishToMavenRepository).configureEach { t ->
-    t.mustRunAfter(provider { rootProject.tasks.withType(PublishToMavenRepository) })
 }
