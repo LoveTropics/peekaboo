@@ -5,9 +5,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import org.lovetropics.peekaboo.diguise.Disguise;
-import org.lovetropics.peekaboo.diguise.EntityDisguiseHolder;
-import org.lovetropics.peekaboo.diguise.TypedEntityData;
+import org.lovetropics.peekaboo.api.Disguise;
+import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
+import org.lovetropics.peekaboo.api.TypedEntityData;
 import org.spongepowered.asm.mixin.Mixin;
 
 import javax.annotation.Nullable;

@@ -2,7 +2,8 @@ plugins {
     id 'org.lovetropics.peekaboo.conventions'
 }
 
-group = group_id
+group = rootProject.group
+version = rootProject.version
 
 neoForge {
     version = project.neo_version
@@ -12,36 +13,15 @@ neoForge {
         mappingsVersion = project.parchment_version
     }
 
-    runs {
-        configureEach {
-            logLevel = org.slf4j.event.Level.WARN
-            gameDirectory = project.file('run')
-        }
-        client {
-            client()
-        }
-        server {
-            server()
-        }
-        data {
-            clientData()
-            programArguments.addAll '--mod', "${mod_id}", '--all', '--output', file('src/generated/resources/').absolutePath, '--existing', file('src/main/resources/').absolutePath
-        }
-    }
-
     mods {
-        "${mod_id}" {
-            sourceSet sourceSets.main
-        }
         "${mod_id}_api" {
-            sourceSet project(':peekaboo-api').sourceSets.main
+            sourceSet sourceSets.main
         }
     }
 }
 
-dependencies {
-    api project(":peekaboo-api")
-    jarJar project(":peekaboo-api")
+java {
+    withJavadocJar()
 }
 
 conventions {
@@ -52,7 +32,7 @@ conventions {
             neo_version            : neo_version,
             neo_version_range      : neo_version_range,
             loader_version_range   : loader_version_range,
-            mod_id                 : mod_id,
+            mod_id                 : "${mod_id}_api",
             mod_name               : mod_name,
             mod_license            : mod_license,
             mod_version            : mod_version,
@@ -62,7 +42,7 @@ conventions {
 }
 
 publishing {
-    publications.register('mavenJava', MavenPublication) {
+    publications.register('mavenJavaApi', MavenPublication) {
         from components.java
     }
 }

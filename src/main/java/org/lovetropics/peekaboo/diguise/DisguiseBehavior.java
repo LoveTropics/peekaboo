@@ -14,6 +14,8 @@ import net.neoforged.neoforge.event.entity.EntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jetbrains.annotations.Contract;
 import org.lovetropics.peekaboo.PeekabooMod;
+import org.lovetropics.peekaboo.api.Disguise;
+import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
 
 import javax.annotation.Nullable;
 import java.util.Objects;

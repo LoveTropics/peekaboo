@@ -26,9 +26,9 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector3f;
 import org.lovetropics.peekaboo.PeekabooDataComponents;
+import org.lovetropics.peekaboo.api.Disguise;
+import org.lovetropics.peekaboo.api.TypedEntityData;
 import org.lovetropics.peekaboo.client.DisguiseRenderState;
-import org.lovetropics.peekaboo.diguise.Disguise;
-import org.lovetropics.peekaboo.diguise.TypedEntityData;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;

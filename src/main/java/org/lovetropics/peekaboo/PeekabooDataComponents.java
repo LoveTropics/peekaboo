@@ -6,8 +6,8 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.util.ExtraCodecs;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import org.lovetropics.peekaboo.diguise.Disguise;
-import org.lovetropics.peekaboo.diguise.TypedEntityData;
+import org.lovetropics.peekaboo.api.Disguise;
+import org.lovetropics.peekaboo.api.TypedEntityData;
 
 public class PeekabooDataComponents {
     public static final DeferredRegister.DataComponents REGISTER = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, PeekabooMod.ID);

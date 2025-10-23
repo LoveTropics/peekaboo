@@ -5,7 +5,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.WalkAnimationState;
 import net.minecraft.world.level.Level;
-import org.lovetropics.peekaboo.diguise.EntityDisguiseHolder;
+import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
 import org.lovetropics.peekaboo.diguise.DisguiseBehavior;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

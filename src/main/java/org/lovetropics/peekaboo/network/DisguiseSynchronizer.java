@@ -8,7 +8,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lovetropics.peekaboo.PeekabooMod;
-import org.lovetropics.peekaboo.diguise.EntityDisguiseHolder;
+import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
 
 @EventBusSubscriber(modid = PeekabooMod.ID)
 public class DisguiseSynchronizer {

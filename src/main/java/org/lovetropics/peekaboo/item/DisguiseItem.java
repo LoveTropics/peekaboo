@@ -10,8 +10,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import org.lovetropics.peekaboo.PeekabooDataComponents;
 import org.lovetropics.peekaboo.PeekabooMod;
-import org.lovetropics.peekaboo.diguise.Disguise;
-import org.lovetropics.peekaboo.diguise.EntityDisguiseHolder;
+import org.lovetropics.peekaboo.api.Disguise;
+import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
 
 @EventBusSubscriber(modid = PeekabooMod.ID)
 public class DisguiseItem extends Item {

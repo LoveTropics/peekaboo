@@ -1,6 +1,7 @@
-package org.lovetropics.peekaboo.diguise;
+package org.lovetropics.peekaboo.api;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -30,13 +31,14 @@ public record Disguise(
             Optional.empty()
     );
 
-    public static final Codec<Disguise> CODEC = RecordCodecBuilder.create(i -> i.group(
+    public static final MapCodec<Disguise> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             TypedEntityData.CODEC.optionalFieldOf("entity").forGetter(Disguise::entity),
             Codec.FLOAT.optionalFieldOf("scale", 1.0f).forGetter(Disguise::scale),
             Codec.BOOL.optionalFieldOf("changes_size", true).forGetter(Disguise::changesSize),
             ComponentSerialization.CODEC.optionalFieldOf("custom_name").forGetter(Disguise::customName),
             ResolvableProfile.CODEC.optionalFieldOf("skin_profile").forGetter(Disguise::skinProfile)
     ).apply(i, Disguise::new));
+    public static final Codec<Disguise> CODEC = MAP_CODEC.codec();
 
     public static final StreamCodec<RegistryFriendlyByteBuf, Disguise> STREAM_CODEC = StreamCodec.composite(
             TypedEntityData.STREAM_CODEC.apply(ByteBufCodecs::optional), Disguise::entity,

@@ -13,8 +13,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.renderstate.RenderStateExtensions;
 import org.lovetropics.peekaboo.PeekabooMod;
+import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
 import org.lovetropics.peekaboo.diguise.DisguiseBehavior;
-import org.lovetropics.peekaboo.diguise.EntityDisguiseHolder;
 import org.lovetropics.peekaboo.item.PeekabooItems;
 import org.slf4j.Logger;
 
