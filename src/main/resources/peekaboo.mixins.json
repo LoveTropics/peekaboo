@@ -3,7 +3,9 @@
   "package": "org.lovetropics.peekaboo.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "LivingEntityMixin", "PlayerMixin"
+    "LivingEntityMixin",
+    "PlayerMixin",
+    "WalkAnimationStateMixin"
   ],
   "client": [
     "client.AbstractClientPlayerMixin", "client.PoseStackAccessor"

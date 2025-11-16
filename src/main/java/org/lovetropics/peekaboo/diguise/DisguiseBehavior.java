@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Contract;
 import org.lovetropics.peekaboo.PeekabooMod;
 import org.lovetropics.peekaboo.api.Disguise;
 import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
+import org.lovetropics.peekaboo.duck.ExtendedWalkAnimationState;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -45,9 +46,7 @@ public final class DisguiseBehavior {
     }
 
     public static void copyWalkAnimation(WalkAnimationState from, WalkAnimationState to) {
-        to.update(from.position() - to.position() - from.speed(), 1.0f, 1.0f);
-        to.setSpeed(from.speed(0.0f));
-        to.update(from.speed(), 1.0f, 1.0f);
+        ((ExtendedWalkAnimationState) to).peekaboo$copyFrom(from);
     }
 
     public static void onDisguiseChange(LivingEntity entity) {
