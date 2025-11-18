@@ -23,14 +23,15 @@ import javax.annotation.Nullable;
 public record DisguiseRenderState(
         @Nullable
         EntityRenderState entityRenderState,
-        float scale
+        float scale,
+        boolean hideShadow
 ) {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final ContextKey<DisguiseRenderState> KEY = new ContextKey<>(PeekabooMod.location("disguise"));
 
     public static DisguiseRenderState scaling(float scale) {
-        return new DisguiseRenderState(null, scale);
+        return new DisguiseRenderState(null, scale, false);
     }
 
     // Can be removed in 1.21.9+ where render states are never reused
@@ -67,7 +68,8 @@ public record DisguiseRenderState(
 
             return new DisguiseRenderState(
                     createFreshRenderState(renderer, disguiseEntity, renderState.partialTick),
-                    disguiseHolder.disguise().scale()
+                    disguiseHolder.disguise().scale(),
+                    disguiseHolder.disguise().hideShadow()
             );
         } catch (Exception e) {
             disguiseHolder.clear();

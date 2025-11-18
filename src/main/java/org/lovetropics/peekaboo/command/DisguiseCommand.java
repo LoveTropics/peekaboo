@@ -34,6 +34,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
 
+import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
+import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
 import static com.mojang.brigadier.arguments.FloatArgumentType.floatArg;
 import static com.mojang.brigadier.arguments.FloatArgumentType.getFloat;
 import static net.minecraft.commands.Commands.argument;
@@ -86,6 +88,11 @@ public class DisguiseCommand {
                 .then(literal("scale")
                         .then(argument("scale", floatArg(0.1f, 20.0f))
                                 .executes(context -> disguiseScale(context, getFloat(context, "scale")))
+                        )
+                )
+                .then(literal("hideShadow")
+                        .then(argument("value", bool())
+                                .executes(context -> disguiseHideShadow(context, getBool(context, "value")))
                         )
                 )
                 .then(literal("clear")
@@ -144,6 +151,10 @@ public class DisguiseCommand {
 
     private static int disguiseScale(CommandContext<CommandSourceStack> context, float scale) throws CommandSyntaxException {
         return updateDisguise(context, d -> d.withScale(scale));
+    }
+
+    private static int disguiseHideShadow(CommandContext<CommandSourceStack> context, boolean hideShadow) throws CommandSyntaxException {
+        return updateDisguise(context, d -> d.withHideShadow(hideShadow));
     }
 
     private static int clearDisguise(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

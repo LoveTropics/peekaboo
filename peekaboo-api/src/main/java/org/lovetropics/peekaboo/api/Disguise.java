@@ -21,14 +21,16 @@ public record Disguise(
         float scale,
         boolean changesSize,
         Optional<Component> customName,
-        Optional<ResolvableProfile> skinProfile
+        Optional<ResolvableProfile> skinProfile,
+        boolean hideShadow
 ) {
     public static final Disguise NONE = new Disguise(
             Optional.empty(),
             1.0f,
             true,
             Optional.empty(),
-            Optional.empty()
+            Optional.empty(),
+            false
     );
 
     public static final MapCodec<Disguise> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -36,7 +38,8 @@ public record Disguise(
             Codec.FLOAT.optionalFieldOf("scale", 1.0f).forGetter(Disguise::scale),
             Codec.BOOL.optionalFieldOf("changes_size", true).forGetter(Disguise::changesSize),
             ComponentSerialization.CODEC.optionalFieldOf("custom_name").forGetter(Disguise::customName),
-            ResolvableProfile.CODEC.optionalFieldOf("skin_profile").forGetter(Disguise::skinProfile)
+            ResolvableProfile.CODEC.optionalFieldOf("skin_profile").forGetter(Disguise::skinProfile),
+            Codec.BOOL.optionalFieldOf("hide_shadow", false).forGetter(Disguise::hideShadow)
     ).apply(i, Disguise::new));
     public static final Codec<Disguise> CODEC = MAP_CODEC.codec();
 
@@ -46,6 +49,7 @@ public record Disguise(
             ByteBufCodecs.BOOL, Disguise::changesSize,
             ComponentSerialization.STREAM_CODEC.apply(ByteBufCodecs::optional), Disguise::customName,
             ResolvableProfile.STREAM_CODEC.apply(ByteBufCodecs::optional), Disguise::skinProfile,
+            ByteBufCodecs.BOOL, Disguise::hideShadow,
             Disguise::new
     );
 
@@ -69,7 +73,8 @@ public record Disguise(
                 scale == other.scale ? clearTo.scale : scale,
                 changesSize == other.changesSize ? clearTo.changesSize : changesSize,
                 customName.equals(other.customName) ? clearTo.customName : customName,
-                skinProfile.equals(other.skinProfile) ? clearTo.skinProfile : skinProfile
+                skinProfile.equals(other.skinProfile) ? clearTo.skinProfile : skinProfile,
+                hideShadow == other.hideShadow ? clearTo.hideShadow : hideShadow
         );
     }
 
@@ -77,27 +82,34 @@ public record Disguise(
         if (entity.equals(this.entity)) {
             return this;
         }
-        return new Disguise(entity, scale, changesSize, customName, skinProfile);
+        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow);
     }
 
     public Disguise withScale(float scale) {
         if (scale == this.scale) {
             return this;
         }
-        return new Disguise(entity, scale, changesSize, customName, skinProfile);
+        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow);
     }
 
     public Disguise withCustomName(Optional<Component> customName) {
         if (customName.equals(this.customName)) {
             return this;
         }
-        return new Disguise(entity, scale, changesSize, customName, skinProfile);
+        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow);
     }
 
     public Disguise withSkinProfile(Optional<ResolvableProfile> skinProfile) {
         if (skinProfile.equals(this.skinProfile)) {
             return this;
         }
-        return new Disguise(entity, scale, changesSize, customName, skinProfile);
+        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow);
+    }
+
+    public Disguise withHideShadow(boolean hideShadow) {
+        if (hideShadow == this.hideShadow) {
+            return this;
+        }
+        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow);
     }
 }

@@ -8,7 +8,8 @@
     "WalkAnimationStateMixin"
   ],
   "client": [
-    "client.AbstractClientPlayerMixin", "client.PoseStackAccessor"
+    "client.AbstractClientPlayerMixin",
+    "client.PoseStackAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

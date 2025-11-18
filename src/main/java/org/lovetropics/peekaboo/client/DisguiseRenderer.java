@@ -41,6 +41,7 @@ public class DisguiseRenderer {
 
         EntityRenderState disguiseEntityState = disguiseState.entityRenderState();
         float scale = disguiseState.scale();
+        boolean hideShadow = disguiseState.hideShadow();
 
         if (disguiseEntityState != null) {
             int capturedTransformState = PoseStackCapture.get(poseStack);
@@ -53,8 +54,10 @@ public class DisguiseRenderer {
                 poseStack.scale(scale, scale, scale);
 
                 EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+                if(hideShadow){
+                    dispatcher.setRenderShadow(false);
+                }
                 dispatcher.render(disguiseEntityState, 0.0, 0.0, 0.0, poseStack, bufferSource, packedLight);
-
                 poseStack.popPose();
             } catch (Exception e) {
                 LOGGER.error("Failed to render player disguise", e);
@@ -71,8 +74,11 @@ public class DisguiseRenderer {
     @SubscribeEvent
     public static void onRenderPlayerPost(RenderLivingEvent.Post<?, ?, ?> event) {
         DisguiseRenderState disguiseState = event.getRenderState().getRenderData(DisguiseRenderState.KEY);
-        if (disguiseState != null && disguiseState.entityRenderState() == null) {
-            event.getPoseStack().popPose();
+        if (disguiseState != null) {
+            Minecraft.getInstance().getEntityRenderDispatcher().setRenderShadow(true);
+            if(disguiseState.entityRenderState() == null){
+                event.getPoseStack().popPose();
+            }
         }
     }
 }
