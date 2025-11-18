@@ -1,12 +1,14 @@
 package org.lovetropics.peekaboo.client.item;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -32,7 +34,7 @@ import org.lovetropics.peekaboo.client.DisguiseRenderState;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
-import java.util.Map;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -89,7 +91,7 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         poseStack.translate(0.5f, 0.5f, 0.5f);
         applyTransforms(argument, displayContext, poseStack);
 
-        entityRenderDispatcher.render(argument.entityInfo.renderState(), 0.0, 0.0, 0.0, poseStack, bufferSource, packedLight);
+        entityRenderDispatcher.render(argument.entity.renderState(), 0.0, 0.0, 0.0, poseStack, bufferSource, packedLight);
 
         poseStack.popPose();
     }
@@ -106,20 +108,20 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
             }
             case FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND -> {
                 poseStack.mulPose(Axis.YP.rotationDegrees(left ? 45.0f : -45.0f));
-                poseStack.translate(0.0f, -0.1f / scale, -argument.entityInfo.width() / 2.0f);
+                poseStack.translate(0.0f, -0.1f / scale, -argument.entity.width() / 2.0f);
             }
             case HEAD -> {
                 poseStack.translate(0.0f, 0.375f / scale, 0.0f);
                 poseStack.mulPose(Axis.YP.rotation(Mth.PI));
             }
             case GUI -> {
-                poseStack.translate(0.0f, -argument.entityInfo.height() / 2.0f, 0.0f);
+                poseStack.translate(0.0f, -argument.entity.height() / 2.0f, 0.0f);
                 poseStack.mulPose(Axis.XP.rotationDegrees(25.0f));
                 poseStack.mulPose(Axis.YP.rotationDegrees(315.0f));
             }
             case GROUND -> poseStack.translate(0.0f, -0.2f / scale, 0.0f);
             case FIXED -> {
-                poseStack.translate(0.0f, -0.2f / scale - argument.entityInfo.height() / 2.0f, 0.0f);
+                poseStack.translate(0.0f, -0.2f / scale - argument.entity.height() / 2.0f, 0.0f);
                 poseStack.mulPose(Axis.YP.rotation(Mth.PI));
             }
         }
@@ -134,7 +136,7 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
             case GROUND -> 0.5f;
             default -> 1.0f;
         };
-        return targetSize / Math.max(argument.entityInfo.approximateSize(), 1.0f);
+        return targetSize / Math.max(argument.entity.approximateSize(), 1.0f);
     }
 
     @Override
@@ -156,7 +158,7 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         if (level == null) {
             return null;
         }
-        EntityInfo info = entityInfoCache.get(level, stack);
+        ExtractedEntity info = entityInfoCache.get(level, stack);
         if (info == null) {
             return null;
         }
@@ -170,7 +172,7 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
 
         @Nullable
         private WeakReference<ClientLevel> level;
-        private final Map<TypedEntityData, Optional<EntityInfo>> entities = new Object2ObjectOpenHashMap<>();
+        private final Cache<TypedEntityData, EntityInfo> entities = CacheBuilder.newBuilder().expireAfterAccess(Duration.ofSeconds(10)).build();
 
         private EntityInfoCache(EntityRenderDispatcher entityRenderDispatcher, EntitySource entitySource) {
             this.entityRenderDispatcher = entityRenderDispatcher;
@@ -178,39 +180,69 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         }
 
         @Nullable
-        public EntityInfo get(ClientLevel level, ItemStack itemStack) {
+        public ExtractedEntity get(ClientLevel level, ItemStack itemStack) {
             TypedEntityData type = entitySource.get(itemStack);
             if (type == null) {
                 return null;
             }
             if (this.level == null || this.level.get() != level) {
-                entities.clear();
+                entities.invalidateAll();
                 this.level = new WeakReference<>(level);
             }
-            Optional<EntityInfo> info = entities.get(type);
-            if (info == null) {
-                info = extractInfo(type.createEntity(level));
-                entities.put(type, info);
+            EntityInfo entityInfo = entities.getIfPresent(type);
+            if (entityInfo == null) {
+                Entity entity = type.createEntity(level);
+                entityInfo = new EntityInfo(entity);
+                entities.put(type, entityInfo);
             }
-            return info.orElse(null);
+            return entityInfo.getOrExtractEntity(entityRenderDispatcher);
+        }
+    }
+
+    private static class EntityInfo {
+        private static final long EXPIRE_AFTER_MILLIS = 1000;
+
+        private final @Nullable Entity entity;
+        private @Nullable ExtractedEntity extractedEntity;
+        private long extractedAtTime;
+
+        private EntityInfo(@Nullable Entity entity) {
+            this.entity = entity;
         }
 
-        private <T extends Entity> Optional<EntityInfo> extractInfo(@Nullable T entity) {
-            if (entity == null) {
-                return Optional.empty();
+        private boolean hasExtractionExpired() {
+            return Util.getMillis() >= extractedAtTime + EXPIRE_AFTER_MILLIS;
+        }
+
+        @Nullable
+        public ExtractedEntity getOrExtractEntity(EntityRenderDispatcher entityRenderDispatcher) {
+            // This kind of sucks, but some entities might update after being created, for example Dummy Players resolving skins
+            // Otherwise, we could discard the entity instance entirely after extracting
+            if (extractedEntity != null && !hasExtractionExpired()) {
+                return extractedEntity;
             }
-            EntityRenderer<? super T, ?> renderer = entityRenderDispatcher.getRenderer(entity);
-            return Optional.of(new EntityInfo(
+            if (entity == null) {
+                return null;
+            }
+            extractedAtTime = Util.getMillis();
+            extractedEntity = extractEntity(entityRenderDispatcher, entity);
+            return extractedEntity;
+        }
+
+        private <E extends Entity> ExtractedEntity extractEntity(EntityRenderDispatcher entityRenderDispatcher, E entity) {
+            EntityRenderer<? super E, ?> renderer = entityRenderDispatcher.getRenderer(entity);
+            return new ExtractedEntity(
                     DisguiseRenderState.createFreshRenderState(renderer, entity, 1.0f),
                     entity.getBbWidth(),
                     entity.getBbHeight(),
                     // Approximate size of the entity - overestimate width a bit because bounding boxes are usually too small
                     Math.max(entity.getBbWidth() * 2.0f, entity.getBbHeight())
-            ));
+            );
         }
     }
 
-    public record EntityInfo(
+    public record ExtractedEntity(
+            // Note: render states are only identity-compared, so the items will be redrawn in UI whenever we refresh the render state
             EntityRenderState renderState,
             float width,
             float height,
@@ -219,7 +251,7 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
     }
 
     public record Argument(
-            EntityInfo entityInfo,
+            ExtractedEntity entity,
             float targetSize
     ) {
     }

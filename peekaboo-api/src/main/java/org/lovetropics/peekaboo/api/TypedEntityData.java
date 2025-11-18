@@ -56,6 +56,10 @@ public record TypedEntityData(CustomData data) {
             if (entity == null) {
                 return null;
             }
+            // The entity constructor randomizes entity rotation for some reason
+            entity.setYRot(0.0f);
+            entity.setYHeadRot(0.0f);
+            entity.setYBodyRot(0.0f);
             data.loadInto(entity);
             fixInvalidEntity(entity);
             return entity;
