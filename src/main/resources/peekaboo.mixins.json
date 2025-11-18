@@ -9,7 +9,6 @@
   ],
   "client": [
     "client.AbstractClientPlayerMixin",
-    "client.EntityRenderDispatcherMixin",
     "client.PoseStackAccessor"
   ],
   "injectors": {
