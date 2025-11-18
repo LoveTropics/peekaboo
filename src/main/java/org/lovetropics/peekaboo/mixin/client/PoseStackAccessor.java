@@ -6,9 +6,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(PoseStack.class)
 public interface PoseStackAccessor {
-	@Accessor
-	void setLastIndex(int index);
+    @Accessor
+    void setLastIndex(int index);
 
-	@Accessor
-	int getLastIndex();
+    @Accessor
+    int getLastIndex();
 }
