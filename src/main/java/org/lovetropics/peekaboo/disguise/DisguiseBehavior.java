@@ -1,4 +1,4 @@
-package org.lovetropics.peekaboo.diguise;
+package org.lovetropics.peekaboo.disguise;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;

@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lovetropics.peekaboo.api.Disguise;
 import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
 import org.lovetropics.peekaboo.api.PeekabooApi;
-import org.lovetropics.peekaboo.diguise.DisguiseBehavior;
+import org.lovetropics.peekaboo.disguise.DisguiseBehavior;
 import org.lovetropics.peekaboo.item.PeekabooItems;
 import org.lovetropics.peekaboo.network.DisguiseSynchronizer;
 
