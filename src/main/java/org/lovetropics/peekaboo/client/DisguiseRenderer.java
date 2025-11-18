@@ -13,6 +13,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
 import org.lovetropics.peekaboo.PeekabooMod;
+import org.lovetropics.peekaboo.mixin.client.HasConditionalShadowRendering;
 import org.slf4j.Logger;
 
 @EventBusSubscriber(modid = PeekabooMod.ID, value = Dist.CLIENT)
@@ -41,6 +42,7 @@ public class DisguiseRenderer {
 
         EntityRenderState disguiseEntityState = disguiseState.entityRenderState();
         float scale = disguiseState.scale();
+        boolean hideShadow = disguiseState.hideShadow();
 
         if (disguiseEntityState != null) {
             int capturedTransformState = PoseStackCapture.get(poseStack);
@@ -53,8 +55,14 @@ public class DisguiseRenderer {
                 poseStack.scale(scale, scale, scale);
 
                 EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+                boolean prevShouldRenderShadow = ((HasConditionalShadowRendering) (Object) dispatcher).lTMods$renderShadows();
+                if(prevShouldRenderShadow && hideShadow){
+                    dispatcher.setRenderShadow(false);
+                }
                 dispatcher.render(disguiseEntityState, 0.0, 0.0, 0.0, poseStack, bufferSource, packedLight);
-
+                if(prevShouldRenderShadow && hideShadow){
+                    dispatcher.setRenderShadow(true);
+                }
                 poseStack.popPose();
             } catch (Exception e) {
                 LOGGER.error("Failed to render player disguise", e);
