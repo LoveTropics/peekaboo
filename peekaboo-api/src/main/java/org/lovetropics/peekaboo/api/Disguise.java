@@ -63,7 +63,8 @@ public record Disguise(
     }
 
     public boolean isEmpty() {
-        return equals(NONE);
+        // If all other fields are empty, ignore `changesSize`
+        return entity.isEmpty() && scale == 1.0f && customName.isEmpty() && skinProfile.isEmpty() && !hideShadow;
     }
 
     public Disguise clear(Disguise other) {
