@@ -84,6 +84,9 @@ public record DisguiseRenderState(
         disguise.xo = entity.xo;
         disguise.yo = entity.yo;
         disguise.zo = entity.zo;
+        disguise.xOld = entity.xOld;
+        disguise.yOld = entity.yOld;
+        disguise.zOld = entity.zOld;
 
         disguise.setYRot(entity.getYRot());
         disguise.yRotO = entity.yRotO;
