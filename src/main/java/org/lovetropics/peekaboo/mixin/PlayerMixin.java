@@ -4,10 +4,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.Level;
 import org.lovetropics.peekaboo.api.Disguise;
 import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
-import org.lovetropics.peekaboo.api.TypedEntityData;
 import org.spongepowered.asm.mixin.Mixin;
 
 import javax.annotation.Nullable;
@@ -22,7 +22,7 @@ public abstract class PlayerMixin extends LivingEntity {
     @Override
     public boolean canBeCollidedWith(@Nullable Entity entity) {
         Disguise disguise = EntityDisguiseHolder.getDisguise((Player) (Object) this);
-        Optional<TypedEntityData> disguiseEntity = disguise.entity();
+        Optional<TypedEntityData<EntityType<?>>> disguiseEntity = disguise.entity();
         if (disguiseEntity.isPresent() && disguiseEntity.get().type() == EntityType.FALLING_BLOCK) {
             return true;
         }

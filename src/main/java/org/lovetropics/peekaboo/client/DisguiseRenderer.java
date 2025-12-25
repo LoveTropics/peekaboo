@@ -3,10 +3,11 @@ package org.lovetropics.peekaboo.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -18,8 +19,6 @@ import org.slf4j.Logger;
 @EventBusSubscriber(modid = PeekabooMod.ID, value = Dist.CLIENT)
 public class DisguiseRenderer {
     private static final Logger LOGGER = LogUtils.getLogger();
-
-    private static boolean hideShadow;
 
     @SubscribeEvent
     @SuppressWarnings("unchecked")
@@ -48,17 +47,21 @@ public class DisguiseRenderer {
             int capturedTransformState = PoseStackCapture.get(poseStack);
 
             try {
-                MultiBufferSource bufferSource = event.getMultiBufferSource();
-                int packedLight = event.getPackedLight();
+                SubmitNodeCollector submitNodeCollector = event.getSubmitNodeCollector();
 
                 poseStack.pushPose();
                 poseStack.scale(scale, scale, scale);
 
                 EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
 
-                hideShadow = disguiseState.hideShadow();
-                dispatcher.render(disguiseEntityState, 0.0, 0.0, 0.0, poseStack, bufferSource, packedLight);
-                hideShadow = false;
+                if (disguiseState.hideShadow()) {
+                    disguiseEntityState.shadowPieces.clear();
+                }
+
+                CameraRenderState cameraRenderState = CameraRenderStateCapture.get();
+                if (cameraRenderState != null) {
+                    dispatcher.submit(disguiseEntityState, cameraRenderState, 0.0, 0.0, 0.0, poseStack, submitNodeCollector);
+                }
 
                 poseStack.popPose();
             } catch (Exception e) {
@@ -67,12 +70,14 @@ public class DisguiseRenderer {
             }
 
             event.setCanceled(true);
-
-            // Big hack - the shadow was rendered by the disguise entity render call above, but canceling above does not discard the shadow
-            event.getRenderState().isInvisible = true;
+            // The shadow was rendered by the disguise entity render call above, but canceling above does not discard the shadow
+            event.getRenderState().shadowPieces.clear();
         } else {
             poseStack.pushPose();
             poseStack.scale(scale, scale, scale);
+            if (disguiseState.hideShadow()) {
+                event.getRenderState().shadowPieces.clear();
+            }
         }
     }
 
@@ -82,13 +87,5 @@ public class DisguiseRenderer {
         if (disguiseState != null && disguiseState.entityRenderState() == null) {
             event.getPoseStack().popPose();
         }
-    }
-
-    public static boolean shouldHideShadow(EntityRenderState renderState) {
-        if (hideShadow) {
-            return true;
-        }
-        DisguiseRenderState disguiseState = renderState.getRenderData(DisguiseRenderState.KEY);
-        return disguiseState != null && disguiseState.entityRenderState() == null && disguiseState.hideShadow();
     }
 }

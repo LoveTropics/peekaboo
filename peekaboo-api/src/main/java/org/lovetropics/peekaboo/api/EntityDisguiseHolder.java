@@ -1,23 +1,21 @@
 package org.lovetropics.peekaboo.api;
 
 import net.minecraft.world.entity.Entity;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.function.UnaryOperator;
 
 public class EntityDisguiseHolder {
     private final Entity entity;
 
     private Disguise disguise = Disguise.NONE;
-    @Nullable
-    private Entity disguisedEntity;
+    private @Nullable Entity disguisedEntity;
 
     public EntityDisguiseHolder(Entity entity) {
         this.entity = entity;
     }
 
-    @Nullable
-    public static EntityDisguiseHolder getOrNull(Entity entity) {
+    public static @Nullable EntityDisguiseHolder getOrNull(Entity entity) {
         return PeekabooApi.impl().getDisguiseHolder(entity);
     }
 
@@ -64,8 +62,7 @@ public class EntityDisguiseHolder {
         return disguise;
     }
 
-    @Nullable
-    public Entity entity() {
+    public @Nullable Entity entity() {
         return disguisedEntity;
     }
 

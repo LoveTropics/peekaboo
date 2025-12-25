@@ -13,7 +13,7 @@ import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
 public class DisguiseCameraEffects {
     @SubscribeEvent
     public static void calculateCameraDistance(CalculateDetachedCameraDistanceEvent event) {
-        EntityDisguiseHolder holder = EntityDisguiseHolder.getOrNull(event.getCamera().getEntity());
+        EntityDisguiseHolder holder = EntityDisguiseHolder.getOrNull(event.getCamera().entity());
         if (holder == null) {
             return;
         }

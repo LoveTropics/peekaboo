@@ -2,7 +2,7 @@ package org.lovetropics.peekaboo;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,7 +17,7 @@ import net.neoforged.neoforge.attachment.IAttachmentSerializer;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lovetropics.peekaboo.api.Disguise;
 import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
 import org.lovetropics.peekaboo.api.PeekabooApi;
@@ -67,8 +67,7 @@ public class PeekabooMod {
 
         PeekabooApi.registerImpl(new PeekabooApi.Impl() {
             @Override
-            @Nullable
-            public EntityDisguiseHolder getDisguiseHolder(Entity entity) {
+            public @Nullable EntityDisguiseHolder getDisguiseHolder(Entity entity) {
                 if (entity instanceof LivingEntity) {
                     return entity.getData(ATTACHMENT);
                 }
@@ -87,7 +86,7 @@ public class PeekabooMod {
         });
     }
 
-    public static ResourceLocation location(String path) {
-        return ResourceLocation.fromNamespaceAndPath(ID, path);
+    public static Identifier identifier(String path) {
+        return Identifier.fromNamespaceAndPath(ID, path);
     }
 }

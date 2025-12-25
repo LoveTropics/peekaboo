@@ -8,45 +8,49 @@ import com.mojang.math.Axis;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.data.AtlasIds;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.TypedEntityData;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.jspecify.annotations.Nullable;
 import org.lovetropics.peekaboo.PeekabooDataComponents;
 import org.lovetropics.peekaboo.api.Disguise;
-import org.lovetropics.peekaboo.api.TypedEntityData;
+import org.lovetropics.peekaboo.api.TypedEntityDataInstantiator;
+import org.lovetropics.peekaboo.client.CameraRenderStateCapture;
 import org.lovetropics.peekaboo.client.DisguiseRenderState;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpecialRenderer.Argument> {
     private final Minecraft minecraft;
     private final EntityRenderDispatcher entityRenderDispatcher;
     private final EntityInfoCache entityInfoCache;
-    @Nullable
-    private final ResourceLocation inventorySprite;
+    private final @Nullable Identifier inventorySprite;
 
-    private MobItemSpecialRenderer(Minecraft minecraft, EntitySource entitySource, @Nullable ResourceLocation inventorySprite) {
+    private MobItemSpecialRenderer(Minecraft minecraft, EntitySource entitySource, @Nullable Identifier inventorySprite) {
         this.minecraft = minecraft;
         entityRenderDispatcher = minecraft.getEntityRenderDispatcher();
         entityInfoCache = new EntityInfoCache(entityRenderDispatcher, entitySource);
@@ -62,36 +66,43 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
                 .setNormal(pose, 0.0f, 1.0f, 0.0f);
     }
 
-    private void drawInventorySprite(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+    private void submitInventorySprite(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay) {
         if (inventorySprite == null) {
             return;
         }
-        ResourceLocation atlas = TextureAtlas.LOCATION_BLOCKS;
-        TextureAtlasSprite sprite = minecraft.getTextureAtlas(atlas).apply(inventorySprite);
-        VertexConsumer consumer = bufferSource.getBuffer(RenderType.textSeeThrough(atlas));
-        PoseStack.Pose pose = poseStack.last();
-        addVertex(consumer, pose, 0.0f, 0.0f, sprite.getU0(), sprite.getV1(), packedLight, packedOverlay);
-        addVertex(consumer, pose, 1.0f, 0.0f, sprite.getU1(), sprite.getV1(), packedLight, packedOverlay);
-        addVertex(consumer, pose, 1.0f, 1.0f, sprite.getU1(), sprite.getV0(), packedLight, packedOverlay);
-        addVertex(consumer, pose, 0.0f, 1.0f, sprite.getU0(), sprite.getV0(), packedLight, packedOverlay);
+        TextureAtlas itemsAtlas = minecraft.getAtlasManager().getAtlasOrThrow(AtlasIds.ITEMS);
+        TextureAtlasSprite sprite = itemsAtlas.getSprite(inventorySprite);
+        submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.textSeeThrough(itemsAtlas.location()), (pose, consumer) -> {
+            addVertex(consumer, pose, 0.0f, 0.0f, sprite.getU0(), sprite.getV1(), packedLight, packedOverlay);
+            addVertex(consumer, pose, 1.0f, 0.0f, sprite.getU1(), sprite.getV1(), packedLight, packedOverlay);
+            addVertex(consumer, pose, 1.0f, 1.0f, sprite.getU1(), sprite.getV0(), packedLight, packedOverlay);
+            addVertex(consumer, pose, 0.0f, 1.0f, sprite.getU0(), sprite.getV0(), packedLight, packedOverlay);
+        });
     }
 
     @Override
-    public void render(@Nullable Argument argument, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, boolean hasFoilType) {
+    public void submit(@Nullable Argument argument, ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoilType, int outlineColor) {
         if (argument != null) {
-            drawEntity(argument, displayContext, poseStack, bufferSource, packedLight);
+            submitEntity(argument, displayContext, poseStack, submitNodeCollector, packedLight);
         }
         if (displayContext == ItemDisplayContext.GUI) {
-            drawInventorySprite(poseStack, bufferSource, packedLight, packedOverlay);
+            submitInventorySprite(poseStack, submitNodeCollector, packedLight, packedOverlay);
         }
     }
 
-    private void drawEntity(Argument argument, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+    private void submitEntity(Argument argument, ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
+        CameraRenderState cameraRenderState = CameraRenderStateCapture.get();
+        if (cameraRenderState == null) {
+            cameraRenderState = new CameraRenderState();
+        }
+
         poseStack.pushPose();
         poseStack.translate(0.5f, 0.5f, 0.5f);
         applyTransforms(argument, displayContext, poseStack);
 
-        entityRenderDispatcher.render(argument.entity.renderState(), 0.0, 0.0, 0.0, poseStack, bufferSource, packedLight);
+        EntityRenderState renderState = argument.entity.renderState();
+        renderState.lightCoords = packedLight;
+        entityRenderDispatcher.submit(renderState, cameraRenderState, 0.0, 0.0, 0.0, poseStack, submitNodeCollector);
 
         poseStack.popPose();
     }
@@ -140,15 +151,15 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
     }
 
     @Override
-    public void getExtents(Set<Vector3f> output) {
-        output.add(new Vector3f(0.0f, 0.0f, 0.0f));
-        output.add(new Vector3f(1.0f, 0.0f, 0.0f));
-        output.add(new Vector3f(0.0f, 1.0f, 0.0f));
-        output.add(new Vector3f(1.0f, 1.0f, 0.0f));
-        output.add(new Vector3f(0.0f, 0.0f, 1.0f));
-        output.add(new Vector3f(1.0f, 0.0f, 1.0f));
-        output.add(new Vector3f(0.0f, 1.0f, 1.0f));
-        output.add(new Vector3f(1.0f, 1.0f, 1.0f));
+    public void getExtents(Consumer<Vector3fc> output) {
+        output.accept(new Vector3f(0.0f, 0.0f, 0.0f));
+        output.accept(new Vector3f(1.0f, 0.0f, 0.0f));
+        output.accept(new Vector3f(0.0f, 1.0f, 0.0f));
+        output.accept(new Vector3f(1.0f, 1.0f, 0.0f));
+        output.accept(new Vector3f(0.0f, 0.0f, 1.0f));
+        output.accept(new Vector3f(1.0f, 0.0f, 1.0f));
+        output.accept(new Vector3f(0.0f, 1.0f, 1.0f));
+        output.accept(new Vector3f(1.0f, 1.0f, 1.0f));
     }
 
     @Override
@@ -170,18 +181,16 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         private final EntityRenderDispatcher entityRenderDispatcher;
         private final EntitySource entitySource;
 
-        @Nullable
-        private WeakReference<ClientLevel> level;
-        private final Cache<TypedEntityData, EntityInfo> entities = CacheBuilder.newBuilder().expireAfterAccess(Duration.ofSeconds(10)).build();
+        private @Nullable WeakReference<ClientLevel> level;
+        private final Cache<TypedEntityData<EntityType<?>>, EntityInfo> entities = CacheBuilder.newBuilder().expireAfterAccess(Duration.ofSeconds(10)).build();
 
         private EntityInfoCache(EntityRenderDispatcher entityRenderDispatcher, EntitySource entitySource) {
             this.entityRenderDispatcher = entityRenderDispatcher;
             this.entitySource = entitySource;
         }
 
-        @Nullable
-        public ExtractedEntity get(ClientLevel level, ItemStack itemStack) {
-            TypedEntityData type = entitySource.get(itemStack);
+        public @Nullable ExtractedEntity get(ClientLevel level, ItemStack itemStack) {
+            TypedEntityData<EntityType<?>> type = entitySource.get(itemStack);
             if (type == null) {
                 return null;
             }
@@ -191,7 +200,7 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
             }
             EntityInfo entityInfo = entities.getIfPresent(type);
             if (entityInfo == null) {
-                Entity entity = type.createEntity(level);
+                Entity entity = TypedEntityDataInstantiator.instantiate(type, level);
                 entityInfo = new EntityInfo(entity);
                 entities.put(type, entityInfo);
             }
@@ -214,8 +223,7 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
             return Util.getMillis() >= extractedAtTime + EXPIRE_AFTER_MILLIS;
         }
 
-        @Nullable
-        public ExtractedEntity getOrExtractEntity(EntityRenderDispatcher entityRenderDispatcher) {
+        public @Nullable ExtractedEntity getOrExtractEntity(EntityRenderDispatcher entityRenderDispatcher) {
             // This kind of sucks, but some entities might update after being created, for example Dummy Players resolving skins
             // Otherwise, we could discard the entity instance entirely after extracting
             if (extractedEntity != null && !hasExtractionExpired()) {
@@ -258,11 +266,11 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
 
     public record Unbaked(
             EntitySource entitySource,
-            Optional<ResourceLocation> inventorySprite
+            Optional<Identifier> inventorySprite
     ) implements SpecialModelRenderer.Unbaked {
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 EntitySource.CODEC.fieldOf("entity_source").forGetter(Unbaked::entitySource),
-                ResourceLocation.CODEC.optionalFieldOf("inventory_sprite").forGetter(Unbaked::inventorySprite)
+                Identifier.CODEC.optionalFieldOf("inventory_sprite").forGetter(Unbaked::inventorySprite)
         ).apply(i, Unbaked::new));
 
         @Override
@@ -271,7 +279,7 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         }
 
         @Override
-        public SpecialModelRenderer<?> bake(EntityModelSet modelSet) {
+        public SpecialModelRenderer<?> bake(BakingContext context) {
             return new MobItemSpecialRenderer(Minecraft.getInstance(), entitySource, inventorySprite.orElse(null));
         }
     }
@@ -287,15 +295,14 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         public static final Codec<EntitySource> CODEC = StringRepresentable.fromEnum(EntitySource::values);
 
         private final String name;
-        private final Function<ItemStack, TypedEntityData> extractor;
+        private final Function<ItemStack, @Nullable TypedEntityData<EntityType<?>>> extractor;
 
-        EntitySource(String name, Function<ItemStack, TypedEntityData> extractor) {
+        EntitySource(String name, Function<ItemStack, @Nullable TypedEntityData<EntityType<?>>> extractor) {
             this.name = name;
             this.extractor = extractor;
         }
 
-        @Nullable
-        public TypedEntityData get(ItemStack stack) {
+        public @Nullable TypedEntityData<EntityType<?>> get(ItemStack stack) {
             return extractor.apply(stack);
         }
 

@@ -3,22 +3,23 @@ package org.lovetropics.peekaboo.api;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
 public record Disguise(
-        Optional<TypedEntityData> entity,
+        Optional<TypedEntityData<EntityType<?>>> entity,
         float scale,
         boolean changesSize,
         Optional<Component> customName,
@@ -38,7 +39,7 @@ public record Disguise(
     );
 
     public static final MapCodec<Disguise> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-            TypedEntityData.CODEC.optionalFieldOf("entity").forGetter(Disguise::entity),
+            TypedEntityData.codec(EntityType.CODEC).optionalFieldOf("entity").forGetter(Disguise::entity),
             Codec.floatRange(MIN_SCALE, MAX_SCALE).optionalFieldOf("scale", 1.0f).forGetter(Disguise::scale),
             Codec.BOOL.optionalFieldOf("changes_size", true).forGetter(Disguise::changesSize),
             ComponentSerialization.CODEC.optionalFieldOf("custom_name").forGetter(Disguise::customName),
@@ -48,7 +49,7 @@ public record Disguise(
     public static final Codec<Disguise> CODEC = MAP_CODEC.codec();
 
     public static final StreamCodec<RegistryFriendlyByteBuf, Disguise> STREAM_CODEC = StreamCodec.composite(
-            TypedEntityData.STREAM_CODEC.apply(ByteBufCodecs::optional), Disguise::entity,
+            TypedEntityData.streamCodec(EntityType.STREAM_CODEC).apply(ByteBufCodecs::optional), Disguise::entity,
             ByteBufCodecs.FLOAT, Disguise::scale,
             ByteBufCodecs.BOOL, Disguise::changesSize,
             ComponentSerialization.STREAM_CODEC.apply(ByteBufCodecs::optional), Disguise::customName,
@@ -58,12 +59,12 @@ public record Disguise(
     );
 
     public static Disguise of(EntityType<?> entity) {
-        return Disguise.NONE.withEntity(Optional.of(new TypedEntityData(entity)));
+        return Disguise.NONE.withEntity(Optional.of(TypedEntityData.of(entity, new CompoundTag())));
     }
 
     @Nullable
     public Entity createEntity(Level level) {
-        return entity.map(entity -> entity.createEntity(level)).orElse(null);
+        return entity.map(entity -> TypedEntityDataInstantiator.instantiate(entity, level)).orElse(null);
     }
 
     public boolean isEmpty() {
@@ -83,7 +84,7 @@ public record Disguise(
         );
     }
 
-    public Disguise withEntity(Optional<TypedEntityData> entity) {
+    public Disguise withEntity(Optional<TypedEntityData<EntityType<?>>> entity) {
         if (entity.equals(this.entity)) {
             return this;
         }

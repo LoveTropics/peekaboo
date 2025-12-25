@@ -10,6 +10,6 @@ import org.lovetropics.peekaboo.PeekabooMod;
 public class PeekabooSpecialRenderers {
     @SubscribeEvent
     public static void register(RegisterSpecialModelRendererEvent event) {
-        event.register(PeekabooMod.location("mob_item"), MobItemSpecialRenderer.Unbaked.MAP_CODEC);
+        event.register(PeekabooMod.identifier("mob_item"), MobItemSpecialRenderer.Unbaked.MAP_CODEC);
     }
 }

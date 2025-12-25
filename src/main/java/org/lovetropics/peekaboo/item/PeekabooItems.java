@@ -1,43 +1,43 @@
 package org.lovetropics.peekaboo.item;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.lovetropics.peekaboo.PeekabooDataComponents;
 import org.lovetropics.peekaboo.PeekabooMod;
 import org.lovetropics.peekaboo.api.Disguise;
-import org.lovetropics.peekaboo.api.TypedEntityData;
 
 import java.util.function.Function;
 
 public class PeekabooItems {
     public static final DeferredRegister.Items REGISTER = DeferredRegister.createItems(PeekabooMod.ID);
 
-    public static final DeferredItem<DisguiseItem> DISGUISE = REGISTER.registerItem("disguise", DisguiseItem::new, new Item.Properties()
+    public static final DeferredItem<DisguiseItem> DISGUISE = REGISTER.registerItem("disguise", DisguiseItem::new, p -> p
             .stacksTo(1)
             .equippable(EquipmentSlot.HEAD));
-    public static final DeferredItem<SimpleMobItem> MOB_HAT = REGISTER.registerItem("mob_hat", SimpleMobItem::new, new Item.Properties()
+    public static final DeferredItem<SimpleMobItem> MOB_HAT = REGISTER.registerItem("mob_hat", SimpleMobItem::new, p -> p
             .stacksTo(1)
             .equippable(EquipmentSlot.HEAD));
-    public static final DeferredItem<SimpleMobItem> PLUSHIE = REGISTER.registerItem("plushie", SimpleMobItem::new, new Item.Properties()
+    public static final DeferredItem<SimpleMobItem> PLUSHIE = REGISTER.registerItem("plushie", SimpleMobItem::new, p -> p
             .stacksTo(1));
 
     public static void fillCreativeTab(CreativeModeTab.ItemDisplayParameters parameters, CreativeModeTab.Output output) {
         fillForEntities(parameters, output, PeekabooItems::createDisguise);
         fillForEntities(parameters, output, entityType -> {
             ItemStack stack = MOB_HAT.toStack();
-            stack.set(PeekabooDataComponents.ENTITY, new TypedEntityData(entityType));
+            stack.set(PeekabooDataComponents.ENTITY, TypedEntityData.of(entityType, new CompoundTag()));
             return stack;
         });
         fillForEntities(parameters, output, entityType -> {
             ItemStack stack = PLUSHIE.toStack();
-            stack.set(PeekabooDataComponents.ENTITY, new TypedEntityData(entityType));
+            stack.set(PeekabooDataComponents.ENTITY, TypedEntityData.of(entityType, new CompoundTag()));
             return stack;
         });
     }

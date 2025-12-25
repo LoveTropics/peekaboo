@@ -3,9 +3,9 @@ package org.lovetropics.peekaboo.mixin.client;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.resources.PlayerSkin;
-import net.minecraft.client.resources.SkinManager;
+import net.minecraft.client.renderer.PlayerSkinRenderCache;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.Level;
 import org.lovetropics.peekaboo.api.Disguise;
@@ -28,8 +28,8 @@ public abstract class AbstractClientPlayerMixin extends Player {
         Disguise disguise = EntityDisguiseHolder.getDisguise(this);
         Optional<ResolvableProfile> skinProfile = disguise.skinProfile();
         if (skinProfile.isPresent()) {
-            SkinManager skinManager = Minecraft.getInstance().getSkinManager();
-            cir.setReturnValue(skinManager.getInsecureSkin(skinProfile.get().gameProfile()));
+            PlayerSkinRenderCache skinRenderCache = Minecraft.getInstance().playerSkinRenderCache();
+            cir.setReturnValue(skinRenderCache.getOrDefault(skinProfile.get()).playerSkin());
         }
     }
 }

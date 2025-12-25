@@ -12,6 +12,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.renderstate.RenderStateExtensions;
+import org.jspecify.annotations.Nullable;
 import org.lovetropics.peekaboo.PeekabooMod;
 import org.lovetropics.peekaboo.api.Disguise;
 import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
@@ -19,17 +20,14 @@ import org.lovetropics.peekaboo.disguise.DisguiseBehavior;
 import org.lovetropics.peekaboo.item.PeekabooItems;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
-
 public record DisguiseRenderState(
-        @Nullable
-        EntityRenderState entityRenderState,
+        @Nullable EntityRenderState entityRenderState,
         float scale,
         boolean hideShadow
 ) {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final ContextKey<DisguiseRenderState> KEY = new ContextKey<>(PeekabooMod.location("disguise"));
+    public static final ContextKey<DisguiseRenderState> KEY = new ContextKey<>(PeekabooMod.identifier("disguise"));
 
     private static DisguiseRenderState extractWithoutEntity(Disguise disguise) {
         return new DisguiseRenderState(null, disguise.scale(), disguise.hideShadow());
@@ -43,8 +41,7 @@ public record DisguiseRenderState(
         return state;
     }
 
-    @Nullable
-    public static DisguiseRenderState extract(LivingEntity entity, LivingEntityRenderState renderState) {
+    public static @Nullable DisguiseRenderState extract(LivingEntity entity, LivingEntityRenderState renderState) {
         EntityDisguiseHolder disguiseHolder = EntityDisguiseHolder.getOrNull(entity);
         if (disguiseHolder == null || disguiseHolder.disguise().isEmpty()) {
             return null;

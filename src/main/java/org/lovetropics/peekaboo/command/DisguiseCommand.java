@@ -15,18 +15,20 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.server.players.ProfileResolver;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.component.ResolvableProfile;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.lovetropics.peekaboo.PeekabooMod;
 import org.lovetropics.peekaboo.api.Disguise;
 import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
-import org.lovetropics.peekaboo.api.TypedEntityData;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -102,27 +104,28 @@ public class DisguiseCommand {
     }
 
     private static int disguiseAsEntity(CommandContext<CommandSourceStack> context, Holder.Reference<EntityType<?>> entity, CompoundTag nbt) throws CommandSyntaxException {
-        TypedEntityData entityData = new TypedEntityData(entity.value(), nbt);
+        TypedEntityData<EntityType<?>> entityData = TypedEntityData.of(entity.value(), nbt);
         return updateDisguise(context, disguise -> disguise.withEntity(Optional.of(entityData)));
     }
 
-    private static int disguiseSkin(CommandContext<CommandSourceStack> context, Collection<GameProfile> profiles) throws CommandSyntaxException {
+    private static int disguiseSkin(CommandContext<CommandSourceStack> context, Collection<NameAndId> profiles) throws CommandSyntaxException {
         ServerPlayer player = context.getSource().getPlayerOrException();
         if (profiles.size() != 1) {
             throw EntityArgument.ERROR_NOT_SINGLE_PLAYER.create();
         }
 
-        GameProfile sourceProfile = Iterables.getOnlyElement(profiles);
-        CompletableFuture<ResolvableProfile> future = SkullBlockEntity.fetchGameProfile(sourceProfile.getId())
-                .thenApply(maybeProfile -> new ResolvableProfile(maybeProfile.orElse(sourceProfile)));
+        NameAndId sourceProfile = Iterables.getOnlyElement(profiles);
+        ResolvableProfile fallbackProfile = ResolvableProfile.createResolved(new GameProfile(sourceProfile.id(), sourceProfile.name()));
 
-        if (future.isDone()) {
-            EntityDisguiseHolder.update(player, disguise -> disguise.withSkinProfile(Optional.of(future.join())));
-            return 1;
-        }
+        ProfileResolver profileResolver = context.getSource().getServer().services().profileResolver();
+        CompletableFuture<ResolvableProfile> future = CompletableFuture.supplyAsync(
+                () -> profileResolver.fetchById(sourceProfile.id()).map(ResolvableProfile::createResolved)
+                        .orElse(fallbackProfile),
+                Util.backgroundExecutor()
+        );
 
         // Just put something in there for now, and replace it later
-        Disguise temporaryDisguise = EntityDisguiseHolder.update(player, disguise -> disguise.withSkinProfile(Optional.of(new ResolvableProfile(sourceProfile))));
+        Disguise temporaryDisguise = EntityDisguiseHolder.update(player, disguise -> disguise.withSkinProfile(Optional.of(fallbackProfile)));
         future.thenAcceptAsync(
                 resolvedProfile -> EntityDisguiseHolder.update(player, replacedDisguise -> {
                     // The skin changed again before we resolved it, don't replace

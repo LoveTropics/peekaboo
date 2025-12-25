@@ -13,12 +13,12 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.Nullable;
 import org.lovetropics.peekaboo.PeekabooMod;
 import org.lovetropics.peekaboo.api.Disguise;
 import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
 import org.lovetropics.peekaboo.duck.ExtendedWalkAnimationState;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 @EventBusSubscriber(modid = PeekabooMod.ID)
@@ -70,8 +70,7 @@ public final class DisguiseBehavior {
     }
 
     @Contract("_,!null->!null")
-    @Nullable
-    private static Component updateDisplayName(Player player, @Nullable Component name) {
+    private static @Nullable Component updateDisplayName(Player player, @Nullable Component name) {
         Disguise disguise = EntityDisguiseHolder.getDisguise(player);
         return disguise.customName().orElse(name);
     }

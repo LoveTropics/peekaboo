@@ -8,7 +8,7 @@ import org.lovetropics.peekaboo.PeekabooMod;
 import org.lovetropics.peekaboo.api.Disguise;
 
 public record ClientboundSetDisguisePacket(int entityId, Disguise disguise) implements CustomPacketPayload {
-    public static final Type<ClientboundSetDisguisePacket> TYPE = new Type<>(PeekabooMod.location("set_disguise"));
+    public static final Type<ClientboundSetDisguisePacket> TYPE = new Type<>(PeekabooMod.identifier("set_disguise"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundSetDisguisePacket> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, ClientboundSetDisguisePacket::entityId,

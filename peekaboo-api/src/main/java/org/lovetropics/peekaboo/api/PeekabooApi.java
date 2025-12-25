@@ -2,13 +2,12 @@ package org.lovetropics.peekaboo.api;
 
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.ApiStatus;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class PeekabooApi {
-    @Nullable
-    private static Impl impl;
+    private static @Nullable Impl impl;
 
     private PeekabooApi() {
     }
@@ -26,8 +25,7 @@ public class PeekabooApi {
     }
 
     public interface Impl {
-        @Nullable
-        EntityDisguiseHolder getDisguiseHolder(Entity entity);
+        @Nullable EntityDisguiseHolder getDisguiseHolder(Entity entity);
 
         void onDisguiseChange(EntityDisguiseHolder holder, Entity entity);
     }
