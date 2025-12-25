@@ -86,7 +86,7 @@ public class DisguiseCommand {
                         )
                 )
                 .then(literal("scale")
-                        .then(argument("scale", floatArg(0.1f, 20.0f))
+                        .then(argument("scale", floatArg(Disguise.MIN_SCALE, Disguise.MAX_SCALE))
                                 .executes(context -> disguiseScale(context, getFloat(context, "scale")))
                         )
                 )

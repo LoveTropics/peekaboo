@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.component.ResolvableProfile;
@@ -24,6 +25,9 @@ public record Disguise(
         Optional<ResolvableProfile> skinProfile,
         boolean hideShadow
 ) {
+    public static final float MIN_SCALE = 0.1f;
+    public static final float MAX_SCALE = 20.0f;
+
     public static final Disguise NONE = new Disguise(
             Optional.empty(),
             1.0f,
@@ -35,7 +39,7 @@ public record Disguise(
 
     public static final MapCodec<Disguise> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             TypedEntityData.CODEC.optionalFieldOf("entity").forGetter(Disguise::entity),
-            Codec.FLOAT.optionalFieldOf("scale", 1.0f).forGetter(Disguise::scale),
+            Codec.floatRange(MIN_SCALE, MAX_SCALE).optionalFieldOf("scale", 1.0f).forGetter(Disguise::scale),
             Codec.BOOL.optionalFieldOf("changes_size", true).forGetter(Disguise::changesSize),
             ComponentSerialization.CODEC.optionalFieldOf("custom_name").forGetter(Disguise::customName),
             ResolvableProfile.CODEC.optionalFieldOf("skin_profile").forGetter(Disguise::skinProfile),
