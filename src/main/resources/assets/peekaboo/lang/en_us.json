@@ -1,5 +1,5 @@
 {
-  "commands.disguise.not_living_entity": "Sources is not a living entity",
+  "commands.disguise.not_living_entity": "Source is not a living entity",
   "creative_tab.peekaboo": "Peekaboo",
   "item.peekaboo.disguise": "Disguise",
   "item.peekaboo.disguise.entity": "%s Disguise",

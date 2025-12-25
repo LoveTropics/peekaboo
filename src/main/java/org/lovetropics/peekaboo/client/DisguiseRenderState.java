@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.renderstate.RenderStateExtensions;
 import org.lovetropics.peekaboo.PeekabooMod;
+import org.lovetropics.peekaboo.api.Disguise;
 import org.lovetropics.peekaboo.api.EntityDisguiseHolder;
 import org.lovetropics.peekaboo.disguise.DisguiseBehavior;
 import org.lovetropics.peekaboo.item.PeekabooItems;
@@ -30,8 +31,8 @@ public record DisguiseRenderState(
 
     public static final ContextKey<DisguiseRenderState> KEY = new ContextKey<>(PeekabooMod.location("disguise"));
 
-    public static DisguiseRenderState scaling(float scale) {
-        return new DisguiseRenderState(null, scale, false);
+    private static DisguiseRenderState extractWithoutEntity(Disguise disguise) {
+        return new DisguiseRenderState(null, disguise.scale(), disguise.hideShadow());
     }
 
     // Can be removed in 1.21.9+ where render states are never reused
@@ -50,7 +51,7 @@ public record DisguiseRenderState(
         }
         Entity disguiseEntity = disguiseHolder.entity();
         if (disguiseEntity == null) {
-            return DisguiseRenderState.scaling(disguiseHolder.disguise().scale());
+            return extractWithoutEntity(disguiseHolder.disguise());
         }
         return extract(entity, renderState, disguiseEntity, disguiseHolder);
     }
@@ -59,7 +60,7 @@ public record DisguiseRenderState(
         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         EntityRenderer<? super E, ?> renderer = entityRenderDispatcher.getRenderer(disguiseEntity);
         if (renderer == null) {
-            return scaling(disguiseHolder.disguise().scale());
+            return extractWithoutEntity(disguiseHolder.disguise());
         }
 
         try {
@@ -76,7 +77,7 @@ public record DisguiseRenderState(
             LOGGER.error("Failed to capture disguise state", e);
         }
 
-        return scaling(disguiseHolder.disguise().scale());
+        return extractWithoutEntity(disguiseHolder.disguise());
     }
 
     private static void copyDisguiseState(Entity disguise, LivingEntity entity) {
