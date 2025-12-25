@@ -36,7 +36,6 @@ import org.lovetropics.peekaboo.PeekabooDataComponents;
 import org.lovetropics.peekaboo.api.Disguise;
 import org.lovetropics.peekaboo.api.TypedEntityDataInstantiator;
 import org.lovetropics.peekaboo.client.CameraRenderStateCapture;
-import org.lovetropics.peekaboo.client.DisguiseRenderState;
 
 import java.lang.ref.WeakReference;
 import java.time.Duration;
@@ -240,7 +239,7 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         private <E extends Entity> ExtractedEntity extractEntity(EntityRenderDispatcher entityRenderDispatcher, E entity) {
             EntityRenderer<? super E, ?> renderer = entityRenderDispatcher.getRenderer(entity);
             return new ExtractedEntity(
-                    DisguiseRenderState.createFreshRenderState(renderer, entity, 1.0f),
+                    renderer.createRenderState(entity, 1.0f),
                     entity.getBbWidth(),
                     entity.getBbHeight(),
                     // Approximate size of the entity - overestimate width a bit because bounding boxes are usually too small

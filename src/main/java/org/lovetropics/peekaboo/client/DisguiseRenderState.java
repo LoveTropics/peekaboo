@@ -11,7 +11,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.renderstate.RenderStateExtensions;
 import org.jspecify.annotations.Nullable;
 import org.lovetropics.peekaboo.PeekabooMod;
 import org.lovetropics.peekaboo.api.Disguise;
@@ -31,14 +30,6 @@ public record DisguiseRenderState(
 
     private static DisguiseRenderState extractWithoutEntity(Disguise disguise) {
         return new DisguiseRenderState(null, disguise.scale(), disguise.hideShadow());
-    }
-
-    // Can be removed in 1.21.9+ where render states are never reused
-    public static <E extends Entity, S extends EntityRenderState> S createFreshRenderState(EntityRenderer<E, S> renderer, E entity, float partialTicks) {
-        S state = renderer.createRenderState();
-        renderer.extractRenderState(entity, state, partialTicks);
-        RenderStateExtensions.onUpdateEntityRenderState(renderer, entity, state);
-        return state;
     }
 
     public static @Nullable DisguiseRenderState extract(LivingEntity entity, LivingEntityRenderState renderState) {
@@ -65,7 +56,7 @@ public record DisguiseRenderState(
             disguiseEntity.setCustomNameVisible(renderState.nameTag != null);
 
             return new DisguiseRenderState(
-                    createFreshRenderState(renderer, disguiseEntity, renderState.partialTick),
+                    renderer.createRenderState(disguiseEntity, renderState.partialTick),
                     disguiseHolder.disguise().scale(),
                     disguiseHolder.disguise().hideShadow()
             );
