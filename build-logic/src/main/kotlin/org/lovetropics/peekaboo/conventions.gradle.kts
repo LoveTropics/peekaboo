@@ -12,13 +12,14 @@ plugins {
 val conventionsExtension = extensions.create(ConventionsExtension.EXTENSION_NAME, ConventionsExtension::class)
 
 val modVersion = project.property("mod_version")!! as String
+val minecraftVersion = project.property("minecraft_version")!! as String
 if (providers.environmentVariable("RELEASE").isPresent) {
-    version = modVersion
+    version = "${modVersion}+${minecraftVersion}"
 } else {
     providers.environmentVariable("GITHUB_RUN_NUMBER").orNull?.let {
-        version = "${modVersion}+${it}-gha"
+        version = "${modVersion}+${minecraftVersion}-${it}-gha"
     } ?: run {
-        version = "${modVersion}+local"
+        version = "${modVersion}+${minecraftVersion}-local"
     }
 }
 
