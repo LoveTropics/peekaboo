@@ -31,7 +31,7 @@ public class DisguiseRenderer {
     }
 
     @SubscribeEvent
-    public static void onRenderPlayerPre(RenderLivingEvent.Pre<?, ?, ?> event) {
+    public static void onRenderEntityPre(RenderLivingEvent.Pre<?, ?, ?> event) {
         DisguiseRenderState disguiseState = event.getRenderState().getRenderData(DisguiseRenderState.KEY);
         if (disguiseState == null) {
             return;
@@ -65,6 +65,9 @@ public class DisguiseRenderer {
             }
 
             event.setCanceled(true);
+
+            // Big hack - the shadow was rendered by the disguise entity render call above, but canceling above does not discard the shadow
+            event.getRenderState().isInvisible = true;
         } else {
             poseStack.pushPose();
             poseStack.scale(scale, scale, scale);
@@ -72,7 +75,7 @@ public class DisguiseRenderer {
     }
 
     @SubscribeEvent
-    public static void onRenderPlayerPost(RenderLivingEvent.Post<?, ?, ?> event) {
+    public static void onRenderEntityPost(RenderLivingEvent.Post<?, ?, ?> event) {
         DisguiseRenderState disguiseState = event.getRenderState().getRenderData(DisguiseRenderState.KEY);
         if (disguiseState != null) {
             Minecraft.getInstance().getEntityRenderDispatcher().setRenderShadow(true);
