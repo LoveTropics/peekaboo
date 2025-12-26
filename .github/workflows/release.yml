@@ -1,7 +1,8 @@
 name: Build & Release
 
 on:
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   upload:
@@ -26,3 +27,24 @@ jobs:
           MAVEN_URL: ${{ secrets.MAVEN_URL }}
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+
+      - name: Set up Environment Variables
+        id: env-vars
+        run: echo "##[set-output name=mcversion;]$(grep 'minecraft_version' gradle.properties | cut -f2- -d=)"
+
+      - name: Publish to Services (Release)
+        uses: Kir-Antipov/mc-publish@v3
+        with:
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          modrinth-id: fLWQBdR8
+          curseforge-id: 1413789
+          version-type: release
+          files: build/libs/!(*-dev|*-slim|*-sources|*-javadoc).jar
+          game-versions: |
+            ${{ steps.env-vars.outputs.mcversion }}
+          loaders: |
+            neoforge
+          java: |
+            21
