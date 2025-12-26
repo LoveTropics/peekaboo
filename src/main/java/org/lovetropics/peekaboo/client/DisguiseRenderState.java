@@ -55,8 +55,13 @@ public record DisguiseRenderState(
             copyDisguiseState(disguiseEntity, entity);
             disguiseEntity.setCustomNameVisible(renderState.nameTag != null);
 
+            EntityRenderState disguiseEntityState = renderer.createRenderState(disguiseEntity, renderState.partialTick);
+            if (disguiseHolder.disguise().hideShadow()) {
+                disguiseEntityState.shadowPieces.clear();
+            }
+
             return new DisguiseRenderState(
-                    renderer.createRenderState(disguiseEntity, renderState.partialTick),
+                    disguiseEntityState,
                     disguiseHolder.disguise().scale(),
                     disguiseHolder.disguise().hideShadow()
             );

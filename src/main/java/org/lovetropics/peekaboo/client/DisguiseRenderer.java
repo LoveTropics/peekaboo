@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -54,8 +55,12 @@ public class DisguiseRenderer {
 
                 EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
 
-                if (disguiseState.hideShadow()) {
-                    disguiseEntityState.shadowPieces.clear();
+                // For entities rendered in UI, some properties are overridden in the render state directly after extraction
+                disguiseEntityState.lightCoords = event.getRenderState().lightCoords;
+                if (event.getRenderState() instanceof LivingEntityRenderState fromState && disguiseEntityState instanceof LivingEntityRenderState toState) {
+                    toState.bodyRot = fromState.bodyRot;
+                    toState.yRot = fromState.yRot;
+                    toState.xRot = fromState.xRot;
                 }
 
                 CameraRenderState cameraRenderState = CameraRenderStateCapture.get();
