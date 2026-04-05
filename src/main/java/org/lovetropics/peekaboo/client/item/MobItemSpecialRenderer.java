@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.data.AtlasIds;
@@ -47,12 +47,14 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
     private final Minecraft minecraft;
     private final EntityRenderDispatcher entityRenderDispatcher;
     private final EntityInfoCache entityInfoCache;
+    private final ItemDisplayContext context;
     private final @Nullable Identifier inventorySprite;
 
-    private MobItemSpecialRenderer(Minecraft minecraft, EntitySource entitySource, @Nullable Identifier inventorySprite) {
+    private MobItemSpecialRenderer(Minecraft minecraft, EntitySource entitySource, ItemDisplayContext context, @Nullable Identifier inventorySprite) {
         this.minecraft = minecraft;
         entityRenderDispatcher = minecraft.getEntityRenderDispatcher();
         entityInfoCache = new EntityInfoCache(entityRenderDispatcher, entitySource);
+        this.context = context;
         this.inventorySprite = inventorySprite;
     }
 
@@ -69,6 +71,7 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         if (inventorySprite == null) {
             return;
         }
+
         TextureAtlas itemsAtlas = minecraft.getAtlasManager().getAtlasOrThrow(AtlasIds.ITEMS);
         TextureAtlasSprite sprite = itemsAtlas.getSprite(inventorySprite);
         submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.textSeeThrough(itemsAtlas.location()), (pose, consumer) -> {
@@ -80,16 +83,14 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
     }
 
     @Override
-    public void submit(@Nullable Argument argument, ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoilType, int outlineColor) {
+    public void submit(@Nullable Argument argument, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoilType, int outlineColor) {
         if (argument != null) {
-            submitEntity(argument, displayContext, poseStack, submitNodeCollector, packedLight);
+            submitEntity(argument, poseStack, submitNodeCollector, packedLight);
         }
-        if (displayContext == ItemDisplayContext.GUI) {
-            submitInventorySprite(poseStack, submitNodeCollector, packedLight, packedOverlay);
-        }
+        submitInventorySprite(poseStack, submitNodeCollector, packedLight, packedOverlay);
     }
 
-    private void submitEntity(Argument argument, ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
+    private void submitEntity(Argument argument, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
         CameraRenderState cameraRenderState = CameraRenderStateCapture.get();
         if (cameraRenderState == null) {
             cameraRenderState = new CameraRenderState();
@@ -97,7 +98,7 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
 
         poseStack.pushPose();
         poseStack.translate(0.5f, 0.5f, 0.5f);
-        applyTransforms(argument, displayContext, poseStack);
+        applyTransforms(argument, poseStack);
 
         EntityRenderState renderState = argument.entity.renderState();
         renderState.lightCoords = packedLight;
@@ -106,8 +107,8 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         poseStack.popPose();
     }
 
-    private void applyTransforms(Argument argument, ItemDisplayContext context, PoseStack poseStack) {
-        float scale = getScale(argument, context);
+    private void applyTransforms(Argument argument, PoseStack poseStack) {
+        float scale = getScale(argument);
         poseStack.scale(scale, scale, scale);
 
         boolean left = context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND || context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
@@ -137,7 +138,7 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         }
     }
 
-    private float getScale(Argument argument, ItemDisplayContext context) {
+    private float getScale(Argument argument) {
         float targetSize = argument.targetSize() * switch (context) {
             case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND, FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND ->
                     0.8f;
@@ -265,11 +266,13 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
 
     public record Unbaked(
             EntitySource entitySource,
-            Optional<Identifier> inventorySprite
-    ) implements SpecialModelRenderer.Unbaked {
+            Optional<Identifier> inventorySprite,
+            ItemDisplayContext displayContext
+    ) implements SpecialModelRenderer.Unbaked<MobItemSpecialRenderer.Argument> {
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 EntitySource.CODEC.fieldOf("entity_source").forGetter(Unbaked::entitySource),
-                Identifier.CODEC.optionalFieldOf("inventory_sprite").forGetter(Unbaked::inventorySprite)
+                Identifier.CODEC.optionalFieldOf("inventory_sprite").forGetter(Unbaked::inventorySprite),
+                ItemDisplayContext.CODEC.fieldOf("context").forGetter(Unbaked::displayContext)
         ).apply(i, Unbaked::new));
 
         @Override
@@ -278,8 +281,8 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         }
 
         @Override
-        public SpecialModelRenderer<?> bake(BakingContext context) {
-            return new MobItemSpecialRenderer(Minecraft.getInstance(), entitySource, inventorySprite.orElse(null));
+        public SpecialModelRenderer<MobItemSpecialRenderer.Argument> bake(BakingContext context) {
+            return new MobItemSpecialRenderer(Minecraft.getInstance(), entitySource, displayContext, inventorySprite.orElse(null));
         }
     }
 

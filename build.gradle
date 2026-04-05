@@ -7,11 +7,6 @@ group = group_id
 neoForge {
     version = project.neo_version
 
-    parchment {
-        minecraftVersion = project.minecraft_version
-        mappingsVersion = project.parchment_version
-    }
-
     runs {
         configureEach {
             logLevel = org.slf4j.event.Level.WARN
@@ -45,7 +40,7 @@ dependencies {
 }
 
 conventions {
-    javaVersion = 21
+    javaVersion = 25
     createModMetadataTask([
             minecraft_version      : minecraft_version,
             minecraft_version_range: minecraft_version_range,

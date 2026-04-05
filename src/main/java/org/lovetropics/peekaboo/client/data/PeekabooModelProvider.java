@@ -6,8 +6,12 @@ import net.minecraft.client.data.models.ModelProvider;
 import net.minecraft.client.data.models.model.ItemModelUtils;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.SelectItemModel;
+import net.minecraft.client.renderer.item.properties.select.DisplayContext;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -18,6 +22,8 @@ import org.lovetropics.peekaboo.PeekabooMod;
 import org.lovetropics.peekaboo.client.item.MobItemSpecialRenderer;
 import org.lovetropics.peekaboo.item.PeekabooItems;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @EventBusSubscriber(modid = PeekabooMod.ID, value = Dist.CLIENT)
@@ -37,13 +43,31 @@ public class PeekabooModelProvider extends ModelProvider {
 
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-        generateMobItem(PeekabooItems.DISGUISE, itemModels, MobItemSpecialRenderer.EntitySource.DISGUISE, Optional.of(DISGUISE_ITEM_SPRITE));
-        generateMobItem(PeekabooItems.MOB_HAT, itemModels, MobItemSpecialRenderer.EntitySource.ENTITY, Optional.of(MOB_HAT_SPRITE));
-        generateMobItem(PeekabooItems.PLUSHIE, itemModels, MobItemSpecialRenderer.EntitySource.ENTITY, Optional.of(PLUSHIE_SPRITE));
+        generateMobItem(PeekabooItems.DISGUISE, itemModels, MobItemSpecialRenderer.EntitySource.DISGUISE, DISGUISE_ITEM_SPRITE);
+        generateMobItem(PeekabooItems.MOB_HAT, itemModels, MobItemSpecialRenderer.EntitySource.ENTITY, MOB_HAT_SPRITE);
+        generateMobItem(PeekabooItems.PLUSHIE, itemModels, MobItemSpecialRenderer.EntitySource.ENTITY, PLUSHIE_SPRITE);
     }
 
-    private static void generateMobItem(DeferredItem<?> item, ItemModelGenerators itemModels, MobItemSpecialRenderer.EntitySource entitySource, Optional<Identifier> inventorySprite) {
+    private static void generateMobItem(DeferredItem<?> item, ItemModelGenerators itemModels, MobItemSpecialRenderer.EntitySource entitySource, Identifier inventorySprite) {
         Identifier baseModel = ModelTemplates.PARTICLE_ONLY.create(item.get(), TextureMapping.particle(Blocks.BLACK_WOOL), itemModels.modelOutput);
-        itemModels.itemModelOutput.accept(item.get(), ItemModelUtils.specialModel(baseModel, new MobItemSpecialRenderer.Unbaked(entitySource, inventorySprite)));
+        ItemModel.Unbaked groundModel = ItemModelUtils.specialModel(baseModel, new MobItemSpecialRenderer.Unbaked(entitySource, Optional.empty(), ItemDisplayContext.GROUND));
+
+        List<SelectItemModel.SwitchCase<ItemDisplayContext>> cases = getSwitchCases(entitySource, inventorySprite, baseModel);
+        ItemModel.Unbaked select = ItemModelUtils.select(new DisplayContext(), groundModel, cases.toArray(new SelectItemModel.SwitchCase[0]));
+
+        itemModels.itemModelOutput.accept(item.get(), select);
+    }
+
+    private static List<SelectItemModel.SwitchCase<ItemDisplayContext>> getSwitchCases(MobItemSpecialRenderer.EntitySource entitySource, Identifier inventorySprite, Identifier baseModel) {
+        List<SelectItemModel.SwitchCase<ItemDisplayContext>> cases = new ArrayList<>();
+
+        for (ItemDisplayContext value : ItemDisplayContext.values()) {
+            if (value == ItemDisplayContext.GROUND || value == ItemDisplayContext.NONE) {
+                continue;
+            }
+            Optional<Identifier> texture = value == ItemDisplayContext.GUI ? Optional.of(inventorySprite) : Optional.empty();
+            cases.add(ItemModelUtils.when(value, ItemModelUtils.specialModel(baseModel, new MobItemSpecialRenderer.Unbaked(entitySource, texture, value))));
+        }
+        return cases;
     }
 }

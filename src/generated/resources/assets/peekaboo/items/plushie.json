@@ -1,11 +1,114 @@
 {
   "model": {
-    "type": "minecraft:special",
-    "base": "peekaboo:item/plushie",
-    "model": {
-      "type": "peekaboo:mob_item",
-      "entity_source": "entity",
-      "inventory_sprite": "peekaboo:item/plushie"
-    }
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:special",
+          "base": "peekaboo:item/plushie",
+          "model": {
+            "type": "peekaboo:mob_item",
+            "context": "thirdperson_lefthand",
+            "entity_source": "entity"
+          }
+        },
+        "when": "thirdperson_lefthand"
+      },
+      {
+        "model": {
+          "type": "minecraft:special",
+          "base": "peekaboo:item/plushie",
+          "model": {
+            "type": "peekaboo:mob_item",
+            "context": "thirdperson_righthand",
+            "entity_source": "entity"
+          }
+        },
+        "when": "thirdperson_righthand"
+      },
+      {
+        "model": {
+          "type": "minecraft:special",
+          "base": "peekaboo:item/plushie",
+          "model": {
+            "type": "peekaboo:mob_item",
+            "context": "firstperson_lefthand",
+            "entity_source": "entity"
+          }
+        },
+        "when": "firstperson_lefthand"
+      },
+      {
+        "model": {
+          "type": "minecraft:special",
+          "base": "peekaboo:item/plushie",
+          "model": {
+            "type": "peekaboo:mob_item",
+            "context": "firstperson_righthand",
+            "entity_source": "entity"
+          }
+        },
+        "when": "firstperson_righthand"
+      },
+      {
+        "model": {
+          "type": "minecraft:special",
+          "base": "peekaboo:item/plushie",
+          "model": {
+            "type": "peekaboo:mob_item",
+            "context": "head",
+            "entity_source": "entity"
+          }
+        },
+        "when": "head"
+      },
+      {
+        "model": {
+          "type": "minecraft:special",
+          "base": "peekaboo:item/plushie",
+          "model": {
+            "type": "peekaboo:mob_item",
+            "context": "gui",
+            "entity_source": "entity",
+            "inventory_sprite": "peekaboo:item/plushie"
+          }
+        },
+        "when": "gui"
+      },
+      {
+        "model": {
+          "type": "minecraft:special",
+          "base": "peekaboo:item/plushie",
+          "model": {
+            "type": "peekaboo:mob_item",
+            "context": "fixed",
+            "entity_source": "entity"
+          }
+        },
+        "when": "fixed"
+      },
+      {
+        "model": {
+          "type": "minecraft:special",
+          "base": "peekaboo:item/plushie",
+          "model": {
+            "type": "peekaboo:mob_item",
+            "context": "on_shelf",
+            "entity_source": "entity"
+          }
+        },
+        "when": "on_shelf"
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:special",
+      "base": "peekaboo:item/plushie",
+      "model": {
+        "type": "peekaboo:mob_item",
+        "context": "ground",
+        "entity_source": "entity"
+      }
+    },
+    "property": "minecraft:display_context"
   }
 }

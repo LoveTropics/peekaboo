@@ -1,6 +1,6 @@
 package org.lovetropics.peekaboo.client;
 
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayDeque;
