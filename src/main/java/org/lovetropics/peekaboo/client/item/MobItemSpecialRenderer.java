@@ -44,16 +44,18 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpecialRenderer.Argument> {
+    private static final EntityInfoCache ENTITY_INFO_CACHE = new EntityInfoCache(Minecraft.getInstance().getEntityRenderDispatcher());
+
     private final Minecraft minecraft;
     private final EntityRenderDispatcher entityRenderDispatcher;
-    private final EntityInfoCache entityInfoCache;
+    private final EntitySource entitySource;
     private final ItemDisplayContext context;
     private final @Nullable Identifier inventorySprite;
 
     private MobItemSpecialRenderer(Minecraft minecraft, EntitySource entitySource, ItemDisplayContext context, @Nullable Identifier inventorySprite) {
         this.minecraft = minecraft;
         entityRenderDispatcher = minecraft.getEntityRenderDispatcher();
-        entityInfoCache = new EntityInfoCache(entityRenderDispatcher, entitySource);
+        this.entitySource = entitySource;
         this.context = context;
         this.inventorySprite = inventorySprite;
     }
@@ -169,7 +171,11 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         if (level == null) {
             return null;
         }
-        ExtractedEntity info = entityInfoCache.get(level, stack);
+        TypedEntityData<EntityType<?>> entityType = entitySource.get(stack);
+        if (entityType == null) {
+            return null;
+        }
+        ExtractedEntity info = ENTITY_INFO_CACHE.get(level, entityType);
         if (info == null) {
             return null;
         }
@@ -179,21 +185,15 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
 
     private static class EntityInfoCache {
         private final EntityRenderDispatcher entityRenderDispatcher;
-        private final EntitySource entitySource;
 
         private @Nullable WeakReference<ClientLevel> level;
         private final Cache<TypedEntityData<EntityType<?>>, EntityInfo> entities = CacheBuilder.newBuilder().expireAfterAccess(Duration.ofSeconds(10)).build();
 
-        private EntityInfoCache(EntityRenderDispatcher entityRenderDispatcher, EntitySource entitySource) {
+        private EntityInfoCache(EntityRenderDispatcher entityRenderDispatcher) {
             this.entityRenderDispatcher = entityRenderDispatcher;
-            this.entitySource = entitySource;
         }
 
-        public @Nullable ExtractedEntity get(ClientLevel level, ItemStack itemStack) {
-            TypedEntityData<EntityType<?>> type = entitySource.get(itemStack);
-            if (type == null) {
-                return null;
-            }
+        public @Nullable ExtractedEntity get(ClientLevel level, TypedEntityData<EntityType<?>> type) {
             if (this.level == null || this.level.get() != level) {
                 entities.invalidateAll();
                 this.level = new WeakReference<>(level);
