@@ -4,7 +4,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.storage.ValueInput;
@@ -34,7 +34,7 @@ public class PeekabooMod {
     private static final DeferredRegister<CreativeModeTab> TAB_REGISTER = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, ID);
 
     public static final DeferredHolder<CreativeModeTab, ?> CREATIVE_TAB = TAB_REGISTER.register("peekaboo", () -> CreativeModeTab.builder()
-            .icon(() -> PeekabooItems.createDisguise(EntityType.CREEPER))
+            .icon(() -> PeekabooItems.createDisguise(EntityTypes.CREEPER))
             .displayItems(PeekabooItems::fillCreativeTab)
             .title(Component.translatable("creative_tab.peekaboo"))
             .build());

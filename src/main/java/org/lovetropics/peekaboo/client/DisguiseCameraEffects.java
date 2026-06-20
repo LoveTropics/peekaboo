@@ -2,6 +2,7 @@ package org.lovetropics.peekaboo.client;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -24,7 +25,7 @@ public class DisguiseCameraEffects {
     private static float getEffectiveScale(EntityDisguiseHolder holder) {
         Entity entity = holder.entity();
         if (entity != null) {
-            float entityScale = entity.getBbHeight() / EntityType.PLAYER.getHeight();
+            float entityScale = entity.getBbHeight() / EntityTypes.PLAYER.getHeight();
             return holder.disguise().scale() * entityScale;
         } else {
             return holder.disguise().scale();

@@ -2,6 +2,7 @@ package org.lovetropics.peekaboo.mixin;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.TypedEntityData;
@@ -23,7 +24,7 @@ public abstract class PlayerMixin extends LivingEntity {
     public boolean canBeCollidedWith(@Nullable Entity entity) {
         Disguise disguise = EntityDisguiseHolder.getDisguise((Player) (Object) this);
         Optional<TypedEntityData<EntityType<?>>> disguiseEntity = disguise.entity();
-        if (disguiseEntity.isPresent() && disguiseEntity.get().type() == EntityType.FALLING_BLOCK) {
+        if (disguiseEntity.isPresent() && disguiseEntity.get().type() == EntityTypes.FALLING_BLOCK) {
             return true;
         }
         return super.canBeCollidedWith(entity);

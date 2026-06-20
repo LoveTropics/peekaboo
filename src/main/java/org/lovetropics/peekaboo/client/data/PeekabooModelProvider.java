@@ -10,6 +10,8 @@ import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.SelectItemModel;
 import net.minecraft.client.renderer.item.properties.select.DisplayContext;
 import net.minecraft.data.PackOutput;
+import net.minecraft.references.BlockItemId;
+import net.minecraft.references.BlockItemIds;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.Blocks;
@@ -49,7 +51,7 @@ public class PeekabooModelProvider extends ModelProvider {
     }
 
     private static void generateMobItem(DeferredItem<?> item, ItemModelGenerators itemModels, MobItemSpecialRenderer.EntitySource entitySource, Identifier inventorySprite) {
-        Identifier baseModel = ModelTemplates.PARTICLE_ONLY.create(item.get(), TextureMapping.particle(Blocks.BLACK_WOOL), itemModels.modelOutput);
+        Identifier baseModel = ModelTemplates.PARTICLE_ONLY.create(item.get(), TextureMapping.particle(Blocks.WOOL.black()), itemModels.modelOutput);
         ItemModel.Unbaked groundModel = ItemModelUtils.specialModel(baseModel, new MobItemSpecialRenderer.Unbaked(entitySource, Optional.empty(), ItemDisplayContext.GROUND));
 
         List<SelectItemModel.SwitchCase<ItemDisplayContext>> cases = getSwitchCases(entitySource, inventorySprite, baseModel);
