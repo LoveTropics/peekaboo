@@ -18,6 +18,7 @@ public class TypedEntityDataInstantiator {
             if (entity == null) {
                 return null;
             }
+            entity.setId(1);
             // The entity constructor randomizes entity rotation for some reason
             entity.setYRot(0.0f);
             entity.setYHeadRot(0.0f);
