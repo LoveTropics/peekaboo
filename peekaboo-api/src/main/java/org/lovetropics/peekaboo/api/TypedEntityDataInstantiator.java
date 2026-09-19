@@ -3,6 +3,7 @@ package org.lovetropics.peekaboo.api;
 import com.mojang.logging.LogUtils;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntitySpawnRequest;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.Level;
@@ -14,7 +15,7 @@ public class TypedEntityDataInstantiator {
 
     public static @Nullable Entity instantiate(TypedEntityData<EntityType<?>> data, Level level) {
         try {
-            Entity entity = data.type().create(level, EntitySpawnReason.LOAD);
+            Entity entity = data.type().create(level, new EntitySpawnRequest(EntitySpawnReason.LOAD, true));
             if (entity == null) {
                 return null;
             }
