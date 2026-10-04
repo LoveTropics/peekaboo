@@ -22,14 +22,15 @@ import org.slf4j.Logger;
 public record DisguiseRenderState(
         @Nullable EntityRenderState entityRenderState,
         float scale,
-        boolean hideShadow
+        boolean hideShadow,
+        boolean useDisguiseArmor
 ) {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final ContextKey<DisguiseRenderState> KEY = new ContextKey<>(PeekabooMod.identifier("disguise"));
 
     private static DisguiseRenderState extractWithoutEntity(Disguise disguise) {
-        return new DisguiseRenderState(null, disguise.scale(), disguise.hideShadow());
+        return new DisguiseRenderState(null, disguise.scale(), disguise.hideShadow(), disguise.useDisuseEquipment());
     }
 
     public static @Nullable DisguiseRenderState extract(LivingEntity entity, LivingEntityRenderState renderState) {
@@ -52,7 +53,7 @@ public record DisguiseRenderState(
         }
 
         try {
-            copyDisguiseState(disguiseEntity, entity);
+            copyDisguiseState(disguiseEntity, entity, disguiseHolder.disguise().useDisuseEquipment());
             disguiseEntity.setCustomNameVisible(renderState.nameTag != null);
 
             EntityRenderState disguiseEntityState = renderer.createRenderState(disguiseEntity, renderState.partialTick);
@@ -63,7 +64,8 @@ public record DisguiseRenderState(
             return new DisguiseRenderState(
                     disguiseEntityState,
                     disguiseHolder.disguise().scale(),
-                    disguiseHolder.disguise().hideShadow()
+                    disguiseHolder.disguise().hideShadow(),
+                    disguiseHolder.disguise().useDisuseEquipment()
             );
         } catch (Exception e) {
             disguiseHolder.clear();
@@ -73,7 +75,7 @@ public record DisguiseRenderState(
         return extractWithoutEntity(disguiseHolder.disguise());
     }
 
-    private static void copyDisguiseState(Entity disguise, LivingEntity entity) {
+    private static void copyDisguiseState(Entity disguise, LivingEntity entity, boolean useDisguiseArmor) {
         disguise.setPos(entity.getX(), entity.getY(), entity.getZ());
         disguise.xo = entity.xo;
         disguise.yo = entity.yo;
@@ -98,13 +100,13 @@ public record DisguiseRenderState(
         disguise.setGlowingTag(entity.isCurrentlyGlowing());
 
         if (disguise instanceof LivingEntity livingDisguise) {
-            copyLivingDisguiseState(livingDisguise, entity);
+            copyLivingDisguiseState(livingDisguise, entity, useDisguiseArmor);
         }
 
         disguise.tickCount = entity.tickCount;
     }
 
-    private static void copyLivingDisguiseState(LivingEntity disguise, LivingEntity entity) {
+    private static void copyLivingDisguiseState(LivingEntity disguise, LivingEntity entity, boolean useDisguiseEquipment) {
         disguise.yBodyRot = entity.yBodyRot;
         disguise.yBodyRotO = entity.yBodyRotO;
 
@@ -125,10 +127,12 @@ public record DisguiseRenderState(
         disguise.hurtDuration = entity.hurtDuration;
         disguise.hurtMarked = entity.hurtMarked;
 
-        for (EquipmentSlot slot : EquipmentSlot.VALUES) {
-            ItemStack stack = entity.getItemBySlot(slot);
-            if (!stack.is(PeekabooItems.DISGUISE)) {
-                disguise.setItemSlot(slot, stack);
+        if (!useDisguiseEquipment) {
+            for (EquipmentSlot slot : EquipmentSlot.VALUES) {
+                ItemStack stack = entity.getItemBySlot(slot);
+                if (!stack.is(PeekabooItems.DISGUISE)) {
+                    disguise.setItemSlot(slot, stack);
+                }
             }
         }
     }

@@ -97,6 +97,10 @@ public class DisguiseCommand {
                                 .executes(context -> disguiseHideShadow(context, getBool(context, "value")))
                         )
                 )
+                .then(literal("use_disguise_equipment")
+                        .then(argument("value", bool())
+                                .executes(context -> disguiseUseDisguiseEquipment(context, getBool(context, "value"))))
+                        )
                 .then(literal("clear")
                         .executes(DisguiseCommand::clearDisguise)
                 )
@@ -158,6 +162,10 @@ public class DisguiseCommand {
 
     private static int disguiseHideShadow(CommandContext<CommandSourceStack> context, boolean hideShadow) throws CommandSyntaxException {
         return updateDisguise(context, d -> d.withHideShadow(hideShadow));
+    }
+
+    private static int disguiseUseDisguiseEquipment(CommandContext<CommandSourceStack> context, boolean useDisuseEquipment) throws CommandSyntaxException {
+        return updateDisguise(context, d -> d.useDisuseEquipment(useDisuseEquipment));
     }
 
     private static int clearDisguise(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

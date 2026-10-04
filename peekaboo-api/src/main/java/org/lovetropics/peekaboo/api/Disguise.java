@@ -24,7 +24,8 @@ public record Disguise(
         boolean changesSize,
         Optional<Component> customName,
         Optional<ResolvableProfile> skinProfile,
-        boolean hideShadow
+        boolean hideShadow,
+        boolean useDisuseEquipment
 ) {
     public static final float MIN_SCALE = 0.1f;
     public static final float MAX_SCALE = 20.0f;
@@ -35,6 +36,7 @@ public record Disguise(
             true,
             Optional.empty(),
             Optional.empty(),
+            false,
             false
     );
 
@@ -44,7 +46,8 @@ public record Disguise(
             Codec.BOOL.optionalFieldOf("changes_size", true).forGetter(Disguise::changesSize),
             ComponentSerialization.CODEC.optionalFieldOf("custom_name").forGetter(Disguise::customName),
             ResolvableProfile.CODEC.optionalFieldOf("skin_profile").forGetter(Disguise::skinProfile),
-            Codec.BOOL.optionalFieldOf("hide_shadow", false).forGetter(Disguise::hideShadow)
+            Codec.BOOL.optionalFieldOf("hide_shadow", false).forGetter(Disguise::hideShadow),
+            Codec.BOOL.optionalFieldOf("use_disguise_equipment", false).forGetter(Disguise::useDisuseEquipment)
     ).apply(i, Disguise::new));
     public static final Codec<Disguise> CODEC = MAP_CODEC.codec();
 
@@ -55,11 +58,21 @@ public record Disguise(
             ComponentSerialization.STREAM_CODEC.apply(ByteBufCodecs::optional), Disguise::customName,
             ResolvableProfile.STREAM_CODEC.apply(ByteBufCodecs::optional), Disguise::skinProfile,
             ByteBufCodecs.BOOL, Disguise::hideShadow,
+            ByteBufCodecs.BOOL, Disguise::useDisuseEquipment,
             Disguise::new
     );
 
     public static Disguise of(EntityType<?> entity) {
         return Disguise.NONE.withEntity(Optional.of(TypedEntityData.of(entity, new CompoundTag())));
+    }
+
+    public Disguise(Optional<TypedEntityData<EntityType<?>>> entity,
+                     float scale,
+                     boolean changesSize,
+                     Optional<Component> customName,
+                     Optional<ResolvableProfile> skinProfile,
+                     boolean hideShadow) {
+        this(entity, scale, changesSize, customName, skinProfile, hideShadow, false);
     }
 
     @Nullable
@@ -80,7 +93,8 @@ public record Disguise(
                 changesSize == other.changesSize ? clearTo.changesSize : changesSize,
                 customName.equals(other.customName) ? clearTo.customName : customName,
                 skinProfile.equals(other.skinProfile) ? clearTo.skinProfile : skinProfile,
-                hideShadow == other.hideShadow ? clearTo.hideShadow : hideShadow
+                hideShadow == other.hideShadow ? clearTo.hideShadow : hideShadow,
+                useDisuseEquipment == other.useDisuseEquipment ? clearTo.useDisuseEquipment : useDisuseEquipment
         );
     }
 
@@ -88,34 +102,41 @@ public record Disguise(
         if (entity.equals(this.entity)) {
             return this;
         }
-        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow);
+        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow, useDisuseEquipment);
     }
 
     public Disguise withScale(float scale) {
         if (scale == this.scale) {
             return this;
         }
-        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow);
+        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow, useDisuseEquipment);
     }
 
     public Disguise withCustomName(Optional<Component> customName) {
         if (customName.equals(this.customName)) {
             return this;
         }
-        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow);
+        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow, useDisuseEquipment);
     }
 
     public Disguise withSkinProfile(Optional<ResolvableProfile> skinProfile) {
         if (skinProfile.equals(this.skinProfile)) {
             return this;
         }
-        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow);
+        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow, useDisuseEquipment);
     }
 
     public Disguise withHideShadow(boolean hideShadow) {
         if (hideShadow == this.hideShadow) {
             return this;
         }
-        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow);
+        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow, useDisuseEquipment);
+    }
+
+    public Disguise useDisuseEquipment(boolean useDisuseEquipment) {
+        if (useDisuseEquipment == this.useDisuseEquipment) {
+            return this;
+        }
+        return new Disguise(entity, scale, changesSize, customName, skinProfile, hideShadow, useDisuseEquipment);
     }
 }
