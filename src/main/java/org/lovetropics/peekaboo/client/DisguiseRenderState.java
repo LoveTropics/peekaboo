@@ -147,17 +147,16 @@ public record DisguiseRenderState(
         for (Holder<AttachmentType<?>> attachmentTypeHolder : NeoForgeRegistries.ATTACHMENT_TYPES.asHolderIdMap()) {
             if (attachmentTypeHolder.is(PeekabooMod.COPY_RENDER_ATTACHMENTS)) {
                 AttachmentType<?> attachmentType = attachmentTypeHolder.value();
-                if (entity.hasData(attachmentType)) {
-                    copyAttachment(disguise, entity, attachmentType);
-                }
+                copyAttachment(disguise, entity, attachmentType);
             }
         }
     }
 
     private static <T> void copyAttachment(LivingEntity disguise, LivingEntity entity, AttachmentType<T> attachmentType) {
-        if (entity.hasData(attachmentType)) {
-            T attachment = entity.getData(attachmentType);
-            disguise.setData(attachmentType, attachment);
+        T attachment = entity.getExistingDataOrNull(attachmentType);
+        if (attachment == null) {
+            return;
         }
+        disguise.setData(attachmentType, attachment);
     }
 }
