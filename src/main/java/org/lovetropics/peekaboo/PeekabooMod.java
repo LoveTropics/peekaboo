@@ -3,6 +3,7 @@ package org.lovetropics.peekaboo;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
@@ -58,6 +59,8 @@ public class PeekabooMod {
                         }
                     }).build()
     );
+
+    public static final TagKey<AttachmentType<?>> COPY_RENDER_ATTACHMENTS = TagKey.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, identifier("copy_render_attachments"));
 
     public PeekabooMod(IEventBus modBus) {
         PeekabooDataComponents.REGISTER.register(modBus);

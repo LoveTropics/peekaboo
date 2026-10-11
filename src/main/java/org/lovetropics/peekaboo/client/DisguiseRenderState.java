@@ -6,11 +6,15 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jspecify.annotations.Nullable;
 import org.lovetropics.peekaboo.PeekabooMod;
 import org.lovetropics.peekaboo.api.Disguise;
@@ -134,6 +138,26 @@ public record DisguiseRenderState(
                     disguise.setItemSlot(slot, stack);
                 }
             }
+        }
+
+        copyAttachments(disguise, entity);
+    }
+
+    private static void copyAttachments(LivingEntity disguise, LivingEntity entity) {
+        for (Holder<AttachmentType<?>> attachmentTypeHolder : NeoForgeRegistries.ATTACHMENT_TYPES.asHolderIdMap()) {
+            if (attachmentTypeHolder.is(PeekabooMod.COPY_RENDER_ATTACHMENTS)) {
+                AttachmentType<?> attachmentType = attachmentTypeHolder.value();
+                if (entity.hasData(attachmentType)) {
+                    copyAttachment(disguise, entity, attachmentType);
+                }
+            }
+        }
+    }
+
+    private static <T> void copyAttachment(LivingEntity disguise, LivingEntity entity, AttachmentType<T> attachmentType) {
+        if (entity.hasData(attachmentType)) {
+            T attachment = entity.getData(attachmentType);
+            disguise.setData(attachmentType, attachment);
         }
     }
 }
