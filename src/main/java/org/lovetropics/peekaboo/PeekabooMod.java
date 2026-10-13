@@ -12,6 +12,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.attachment.AttachmentSync;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.attachment.IAttachmentHolder;
 import net.neoforged.neoforge.attachment.IAttachmentSerializer;
@@ -60,7 +61,7 @@ public class PeekabooMod {
                     }).build()
     );
 
-    public static final TagKey<AttachmentType<?>> COPY_RENDER_ATTACHMENTS = TagKey.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, identifier("copy_render_attachments"));
+    public static final TagKey<AttachmentType<?>> COPY_RENDER_ATTACHMENTS = TagKey.create(AttachmentSync.SYNCED_ATTACHMENT_TYPES.key(), identifier("copy_render_attachments"));
 
     public PeekabooMod(IEventBus modBus) {
         PeekabooDataComponents.REGISTER.register(modBus);

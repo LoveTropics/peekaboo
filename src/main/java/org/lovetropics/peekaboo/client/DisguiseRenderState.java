@@ -13,6 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.attachment.AttachmentSync;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jspecify.annotations.Nullable;
@@ -144,7 +145,7 @@ public record DisguiseRenderState(
     }
 
     private static void copyAttachments(LivingEntity disguise, LivingEntity entity) {
-        for (Holder<AttachmentType<?>> attachmentTypeHolder : NeoForgeRegistries.ATTACHMENT_TYPES.asHolderIdMap()) {
+        for (Holder<AttachmentType<?>> attachmentTypeHolder : AttachmentSync.SYNCED_ATTACHMENT_TYPES.asHolderIdMap()) {
             if (attachmentTypeHolder.is(PeekabooMod.COPY_RENDER_ATTACHMENTS)) {
                 AttachmentType<?> attachmentType = attachmentTypeHolder.value();
                 copyAttachment(disguise, entity, attachmentType);
