@@ -24,9 +24,21 @@ public class PeekabooApi {
         PeekabooApi.impl = impl;
     }
 
+    /**
+     * Gets the source entity for a given "disguise" entity.
+     * Example: if player is disguised as a zombie, this method will return the player entity when given the zombie entity.
+     * @param disguseEntity The "disguise" entity.
+     * @return The entity the given "disguise" entity is applied for.
+    * */
+    public static @Nullable Entity getSourceEntity(Entity disguseEntity) {
+        return impl().getSourceEntity(disguseEntity);
+    }
+
     public interface Impl {
         @Nullable EntityDisguiseHolder getDisguiseHolder(Entity entity);
 
         void onDisguiseChange(EntityDisguiseHolder holder, Entity entity);
+
+        @Nullable Entity getSourceEntity(Entity disguseEntity);
     }
 }

@@ -4,6 +4,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,6 +28,7 @@ import org.lovetropics.peekaboo.disguise.DisguiseBehavior;
 import org.lovetropics.peekaboo.item.PeekabooItems;
 import org.lovetropics.peekaboo.network.DisguiseSynchronizer;
 
+import java.util.UUID;
 import java.util.function.Supplier;
 
 @Mod(PeekabooMod.ID)
@@ -61,6 +63,8 @@ public class PeekabooMod {
                     }).build()
     );
 
+    public static final Supplier<AttachmentType<UUID>> OWNER_ID = ATTACHMENT_TYPES.register("owner_id", () -> AttachmentType.builder(() -> Util.NIL_UUID).build());
+
     public static final TagKey<AttachmentType<?>> COPY_RENDER_ATTACHMENTS = TagKey.create(AttachmentSync.SYNCED_ATTACHMENT_TYPES.key(), identifier("copy_render_attachments"));
 
     public PeekabooMod(IEventBus modBus) {
@@ -80,12 +84,22 @@ public class PeekabooMod {
 
             @Override
             public void onDisguiseChange(EntityDisguiseHolder holder, Entity entity) {
+                holder.entity().setData(OWNER_ID, entity.getUUID());
                 if (entity instanceof LivingEntity livingEntity) {
                     DisguiseBehavior.onDisguiseChange(livingEntity);
                     if (!entity.level().isClientSide()) {
                         DisguiseSynchronizer.broadcastDisguise(livingEntity);
                     }
                 }
+            }
+
+            @Override
+            public @Nullable Entity getSourceEntity(Entity disguseEntity) {
+                UUID ownerId = disguseEntity.getExistingDataOrNull(OWNER_ID);
+                if (ownerId == null || ownerId.equals(Util.NIL_UUID)) {
+                    return null;
+                }
+                return disguseEntity.level().getEntity(ownerId);
             }
         });
     }
