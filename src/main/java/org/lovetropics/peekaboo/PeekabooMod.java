@@ -84,7 +84,9 @@ public class PeekabooMod {
 
             @Override
             public void onDisguiseChange(EntityDisguiseHolder holder, Entity entity) {
-                holder.entity().setData(OWNER_ID, entity.getUUID());
+                if (holder.entity() != null) {
+                    holder.entity().setData(OWNER_ID, entity.getUUID());
+                }
                 if (entity instanceof LivingEntity livingEntity) {
                     DisguiseBehavior.onDisguiseChange(livingEntity);
                     if (!entity.level().isClientSide()) {
