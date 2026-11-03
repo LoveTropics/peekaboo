@@ -54,7 +54,8 @@ public final class DisguiseBehavior {
         if (entity instanceof Player player) {
             player.refreshDisplayName();
         }
-        if (entity instanceof ServerPlayer serverPlayer) {
+        // Can be triggered from deserialization before the player connection is set up - no point to send the packet then anyway
+        if (entity instanceof ServerPlayer serverPlayer && serverPlayer.connection != null) {
             serverPlayer.refreshTabListName();
         }
     }
