@@ -2,7 +2,9 @@ package org.lovetropics.peekaboo.disguise;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
@@ -39,7 +41,14 @@ public final class DisguiseBehavior {
         if (disguiseHolder.disguise().changesSize()) {
             actualDimensions = disguiseDimensions;
         } else {
-            actualDimensions = event.getEntity().getDimensions(pose).withEyeHeight(disguiseDimensions.eyeHeight());
+            EntityDimensions originalDimensions = event.getEntity().getDimensions(pose);
+            actualDimensions = new EntityDimensions(
+                    originalDimensions.width(),
+                    originalDimensions.height(),
+                    disguiseDimensions.eyeHeight(),
+                    disguiseDimensions.attachments(),
+                    originalDimensions.fixed()
+            );
         }
 
         event.setNewSize(actualDimensions.scale(scale));
