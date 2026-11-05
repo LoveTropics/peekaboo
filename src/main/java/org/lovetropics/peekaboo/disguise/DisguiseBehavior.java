@@ -25,6 +25,8 @@ import java.util.Objects;
 
 @EventBusSubscriber(modid = PeekabooMod.ID)
 public final class DisguiseBehavior {
+    private static final float EYE_BOUNDS_BUFFER = 1.0f / 16.0f;
+
     @SubscribeEvent
     public static void onSetEntitySize(EntityEvent.Size event) {
         EntityDisguiseHolder disguiseHolder = EntityDisguiseHolder.getOrNull(event.getEntity());
@@ -45,7 +47,8 @@ public final class DisguiseBehavior {
             actualDimensions = new EntityDimensions(
                     originalDimensions.width(),
                     originalDimensions.height(),
-                    disguiseDimensions.eyeHeight(),
+                    // Don't let the eye height leave the player bounds, it just causes clipping
+                    Mth.clamp(disguiseDimensions.eyeHeight(), EYE_BOUNDS_BUFFER, originalDimensions.height() - EYE_BOUNDS_BUFFER),
                     disguiseDimensions.attachments(),
                     originalDimensions.fixed()
             );
