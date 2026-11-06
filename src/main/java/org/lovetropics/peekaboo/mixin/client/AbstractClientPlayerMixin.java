@@ -1,11 +1,10 @@
 package org.lovetropics.peekaboo.mixin.client;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.ClientMannequin;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.PlayerSkinRenderCache;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.Level;
@@ -18,10 +17,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Optional;
 
-@Mixin({AbstractClientPlayer.class, ClientMannequin.class})
-public abstract class ClientAvatarMixin extends Entity {
-    public ClientAvatarMixin(EntityType<?> type, Level level) {
-        super(type, level);
+@Mixin(AbstractClientPlayer.class)
+public abstract class AbstractClientPlayerMixin extends Player {
+    public AbstractClientPlayerMixin(Level level, GameProfile gameProfile) {
+        super(level, gameProfile);
     }
 
     @Inject(method = "getSkin", at = @At("HEAD"), cancellable = true)
