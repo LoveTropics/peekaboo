@@ -8,7 +8,7 @@
     "WalkAnimationStateMixin"
   ],
   "client": [
-    "client.AbstractClientPlayerMixin",
+    "client.ClientAvatarMixin",
     "client.EntityRenderDispatcherMixin",
     "client.PoseStackAccessor"
   ],
