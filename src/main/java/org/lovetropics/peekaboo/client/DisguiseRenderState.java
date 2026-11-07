@@ -65,6 +65,7 @@ public record DisguiseRenderState(
             if (disguiseHolder.disguise().hideShadow()) {
                 disguiseEntityState.shadowPieces.clear();
             }
+            disguiseEntityState.outlineColor = renderState.outlineColor;
 
             return new DisguiseRenderState(
                     disguiseEntityState,
