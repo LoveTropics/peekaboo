@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.ArmedEntityRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.core.Holder;
@@ -65,7 +66,8 @@ public record DisguiseRenderState(
             if (disguiseHolder.disguise().hideShadow()) {
                 disguiseEntityState.shadowPieces.clear();
             }
-            disguiseEntityState.outlineColor = renderState.outlineColor;
+
+            copyRenderStates(disguiseEntityState, renderState);
 
             return new DisguiseRenderState(
                     disguiseEntityState,
@@ -160,5 +162,15 @@ public record DisguiseRenderState(
             return;
         }
         disguise.setData(attachmentType, attachment);
+    }
+
+    private static void copyRenderStates(EntityRenderState disguiseState, EntityRenderState sourceState) {
+        disguiseState.outlineColor = sourceState.outlineColor;
+
+        if (disguiseState instanceof ArmedEntityRenderState disguiseArmedState && sourceState instanceof ArmedEntityRenderState sourceArmedState) {
+            disguiseArmedState.swingAnimationType = sourceArmedState.swingAnimationType;
+            disguiseArmedState.leftArmPose = sourceArmedState.leftArmPose;
+            disguiseArmedState.rightArmPose = sourceArmedState.rightArmPose;
+        }
     }
 }
