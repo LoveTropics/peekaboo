@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    implementation("net.neoforged.moddev:net.neoforged.moddev.gradle.plugin:2.0.141")
+    implementation("net.neoforged.moddev:net.neoforged.moddev.gradle.plugin:2.0.148")
 }

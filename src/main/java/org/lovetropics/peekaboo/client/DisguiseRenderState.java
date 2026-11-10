@@ -123,17 +123,12 @@ public record DisguiseRenderState(
 
         DisguiseBehavior.copyWalkAnimation(entity.walkAnimation, disguise.walkAnimation);
 
-        disguise.swingingArm = entity.swingingArm;
-        disguise.attackAnim = entity.attackAnim;
-        disguise.swingTime = entity.swingTime;
-        disguise.oAttackAnim = entity.oAttackAnim;
-        disguise.swinging = entity.swinging;
-
+        disguise.setSwimming(entity.isSwimming());
         disguise.setOnGround(entity.onGround());
 
         disguise.hurtTime = entity.hurtTime;
         disguise.hurtDuration = entity.hurtDuration;
-        disguise.hurtMarked = entity.hurtMarked;
+        disguise.syncVelocity = entity.syncVelocity;
 
         if (!useDisguiseEquipment) {
             for (EquipmentSlot slot : EquipmentSlot.VALUES) {
@@ -168,9 +163,10 @@ public record DisguiseRenderState(
         disguiseState.outlineColor = sourceState.outlineColor;
 
         if (disguiseState instanceof ArmedEntityRenderState disguiseArmedState && sourceState instanceof ArmedEntityRenderState sourceArmedState) {
-            disguiseArmedState.swingAnimationType = sourceArmedState.swingAnimationType;
+            disguiseArmedState.currentSwing = sourceArmedState.currentSwing;
             disguiseArmedState.leftArmPose = sourceArmedState.leftArmPose;
             disguiseArmedState.rightArmPose = sourceArmedState.rightArmPose;
+            disguiseArmedState.swingAnimation = sourceArmedState.swingAnimation;
         }
     }
 }

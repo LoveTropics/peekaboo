@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import com.mojang.math.Transformation;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -116,26 +117,26 @@ public class MobItemSpecialRenderer implements SpecialModelRenderer<MobItemSpeci
         boolean left = context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND || context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
         switch (context) {
             case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND -> {
-                poseStack.mulPose(Axis.YP.rotationDegrees(left ? 25.0f : -25.0f));
+                poseStack.rotate(Axis.YP.rotationDegrees(left ? 25.0f : -25.0f));
                 poseStack.translate(0.0f, -0.2f / scale, 0.0f);
             }
             case FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND -> {
-                poseStack.mulPose(Axis.YP.rotationDegrees(left ? 45.0f : -45.0f));
+                poseStack.rotate(Axis.YP.rotationDegrees(left ? 45.0f : -45.0f));
                 poseStack.translate(0.0f, -0.1f / scale, -argument.entity.width() / 2.0f);
             }
             case HEAD -> {
                 poseStack.translate(0.0f, 0.375f / scale, 0.0f);
-                poseStack.mulPose(Axis.YP.rotation(Mth.PI));
+                poseStack.rotate(Axis.YP.rotation(Mth.PI));
             }
             case GUI -> {
                 poseStack.translate(0.0f, -argument.entity.height() / 2.0f, 0.0f);
-                poseStack.mulPose(Axis.XP.rotationDegrees(25.0f));
-                poseStack.mulPose(Axis.YP.rotationDegrees(315.0f));
+                poseStack.rotate(Axis.XP.rotationDegrees(25.0f));
+                poseStack.rotate(Axis.YP.rotationDegrees(315.0f));
             }
             case GROUND -> poseStack.translate(0.0f, -0.2f / scale, 0.0f);
             case FIXED -> {
                 poseStack.translate(0.0f, -0.2f / scale - argument.entity.height() / 2.0f, 0.0f);
-                poseStack.mulPose(Axis.YP.rotation(Mth.PI));
+                poseStack.rotate(Axis.YP.rotation(Mth.PI));
             }
         }
     }
